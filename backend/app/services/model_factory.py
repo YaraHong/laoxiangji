@@ -9,7 +9,7 @@ from app.core.config import settings
 def _get_chat_llm(streaming: bool = False):
     return ChatOpenAI(
         model="qwen3.5-plus",
-        api_key="sk-96ac50b53f414a6095151ece0eed52ce",
+        api_key="sk-xxxx",
         streaming=streaming,
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
@@ -19,7 +19,7 @@ def _get_chat_llm(streaming: bool = False):
 def _get_embedding_model():
     return OpenAIEmbeddings(
         model="Qwen3-Embedding-8B",
-        api_key="9ZR6MOAR4O1UIABK4PP1J1KZNCQCL7SYRNZLSY1S",
+        api_key="xxxx",
         base_url="https://ai.gitee.com/v1",
         default_headers={"X-Failover-Enabled": "true"},
     )

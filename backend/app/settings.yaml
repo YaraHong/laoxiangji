@@ -22,7 +22,7 @@ redis:
 
 # AI 模型配置
 model:
-  api_key: sk-96ac50b53f414a6095151ece0eed52ce
+  api_key: xxx
   base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
 #  chat_name: qwen-plus
   chat_name: qwen3.5-plus

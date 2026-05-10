@@ -1,0 +1,66 @@
+# 老乡鸡智能客服 - 运行环境配置
+app:
+  name: laoxiangji
+  debug: true
+
+# 数据库配置
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: "121221"
+  name: laoxiangji
+  url: postgresql+asyncpg://postgres:121221@localhost:5432/laoxiangji
+
+# Redis 配置
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+  password: "121221"
+  url: redis://:121221@localhost:6379/0
+
+# AI 模型配置
+model:
+  api_key: sk-96ac50b53f414a6095151ece0eed52ce
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+#  chat_name: qwen-plus
+  chat_name: qwen3.5-plus
+#  embedding_name: text-embedding-v3
+  embedding_name: Qwen3-Embedding-8B
+  request_timeout: 120
+
+# Milvus 向量数据库
+milvus:
+  host: localhost
+  port: 19530
+  collection: laoxiangji_knowledge
+  dim: 1024
+
+# MinIO 对象存储
+minio:
+  endpoint: localhost:19000
+  access_key: admin
+  secret_key: admin123456
+  bucket: knowledge
+  secure: false
+
+# Celery 异步任务
+celery:
+  broker_url: redis://:121221@localhost:6379/1
+  result_backend: redis://:121221@localhost:6379/2
+
+# 文本切分策略
+text_splitter:
+  chunk_size: 500
+  chunk_overlap: 100
+  separators: [ "\n\n", "\n", ".", "!", "?", "。", "！", "？", " ", "" ]
+
+# Prompt 模板路径管理
+prompts:
+  base_path: "prompts/"
+  templates:
+    chat_system: "chat_system_prompt.txt"
+    rag_system: "rag_system_prompt.txt"
+    lead_hint: "lead_hint_prompt.txt"
+    intent_recognition: "intent_recognition_prompt.txt"

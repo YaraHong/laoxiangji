@@ -1,3 +1,4 @@
+import json
 import time
 
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
@@ -23,7 +24,7 @@ class CustomerServiceNode:
         # 记录开始时间
         start_time = time.time()
         logger.info(f"【意图识别开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-
+        logger.info(f"当前状态：{state}")
         try:
             # 构建chain
             prompt = load_prompt("intent_recognition.txt")

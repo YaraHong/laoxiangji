@@ -19,42 +19,46 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     # 构建图
     builder = StateGraph(OverallStatePrivate)
 
-    # 添加普通节点
+    # 意图识别节点
     builder.add_node("intent_recognition", CustomerServiceNode.intent_recognition)
+    # 人工处理节点
     builder.add_node("human_handling_node", CustomerServiceNode.human_handling_node)
+    # 向量查询节点
     builder.add_node("vector_retrieval", CustomerServiceNode.vector_retrieval)
+    # 构建提示词节点
     builder.add_node("build_output_prompt", CustomerServiceNode.build_output_prompt)
+    # 大模型输出节点
     builder.add_node("llm_output", CustomerServiceNode.llm_output)
 
-    # ⭐ 添加一个空的"路由决策"节点，用于连接两个条件边
+    # 用来衔接两个条件边
     builder.add_node("routing_decision", lambda state: state)  # 空节点，什么都不做
 
-    # 开始
+    # 先做意图识别
     builder.add_edge(START, "intent_recognition")
 
-    # ✅ 第一个条件边：判断是否需要转人工
+    # 根据意图识别判断是否需要转人工
     builder.add_conditional_edges(
         "intent_recognition",
         CustomerServiceNode.should_escalate_to_human,
         {
-            "human_handling_node": "human_handling_node",  # 转人工
-            "should_use_vector_search": "routing_decision"  # 继续到第二个判断
+            "human_handling_node": "human_handling_node",
+            "should_use_vector_search": "routing_decision"
         }
     )
 
+    # 如果需要转人工，直接结束
     builder.add_edge("human_handling_node", END)
 
-    # ✅ 第二个条件边：从 routing_decision 节点出发，判断是否需要向量检索
+    # 判断是否需要向量库查询
     builder.add_conditional_edges(
-        "routing_decision",  # 源节点：空节点
-        CustomerServiceNode.should_use_vector_search,  # 判断函数
+        "routing_decision",
+        CustomerServiceNode.should_use_vector_search,
         {
-            "vector_retrieval": "vector_retrieval",  # 需要向量检索
-            "build_output_prompt": "build_output_prompt"  # 直接构建提示词
+            "vector_retrieval": "vector_retrieval",
+            "build_output_prompt": "build_output_prompt"
         }
     )
 
-    # 后续流程
     builder.add_edge("vector_retrieval", "build_output_prompt")
     builder.add_edge("build_output_prompt", "llm_output")
     builder.add_edge("llm_output", END)

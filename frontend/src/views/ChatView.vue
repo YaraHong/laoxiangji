@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useChat } from '@/composables/useChat'
+import {onMounted} from 'vue'
+import {useChat} from '@/composables/useChat'
 import AppContent from '@/components/layout/AppContent.vue'
 import ChatPanelLeft from '@/components/chat/ChatPanelLeft.vue'
 import ChatPanelRight from '@/components/chat/ChatPanelRight.vue'

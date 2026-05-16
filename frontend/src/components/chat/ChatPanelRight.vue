@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { LeadHint, Message } from '@/types/chat'
+import type {LeadHint, Message} from '@/types/chat'
 import ChatBubble from './ChatBubble.vue'
 import ChatInput from './ChatInput.vue'
+
 const props = defineProps<{
   messages: Message[]
   sending: boolean

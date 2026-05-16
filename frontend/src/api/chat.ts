@@ -1,5 +1,5 @@
 import api from './index'
-import type { Citation, CreateSessionResult, LeadHint, SessionDetail } from '@/types/chat'
+import type {Citation, CreateSessionResult, LeadHint, SessionDetail} from '@/types/chat'
 
 export function createSession(channel = 'web', visitorId?: string) {
   return api.post<CreateSessionResult>('/api/chat/sessions', {

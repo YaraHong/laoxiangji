@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Citation } from '@/types/chat'
+import type {Citation} from '@/types/chat'
 
 defineProps<{ citations: Citation[] }>()
 </script>

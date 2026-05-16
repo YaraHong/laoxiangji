@@ -1,6 +1,6 @@
-import { nextTick, reactive, ref } from 'vue'
-import { createSession, getSession, sendMessageStream } from '@/api/chat'
-import type { Citation, LeadHint, Message } from '@/types/chat'
+import {nextTick, reactive, ref} from 'vue'
+import {createSession, getSession, sendMessageStream} from '@/api/chat'
+import type {Citation, LeadHint, Message} from '@/types/chat'
 
 const SESSION_KEY = 'lxg_session_id'
 

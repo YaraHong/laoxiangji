@@ -2,16 +2,12 @@ from functools import lru_cache
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-from app.core.config import settings
-
 
 @lru_cache()
 def _get_chat_llm(streaming: bool = False):
     return ChatOpenAI(
-        model="qwen3.5-plus",
-        api_key="sk-96ac50b53f414a6095151ece0eed52ce",
+        model="deepseek-v4-pro",
         streaming=streaming,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
 
 
@@ -25,14 +21,9 @@ def _get_embedding_model():
     )
 
 
-# 模块级实例（首次访问时通过 lru_cache 延迟初始化）
 chat_llm = _get_chat_llm()
 streaming_chat_llm = _get_chat_llm(streaming=True)
 light_llm = _get_chat_llm()
-
-
-def get_embedding_model_name() -> str:
-    return settings.model.embedding_name
 
 
 async def create_embedding(texts: list[str]) -> list[list[float]]:

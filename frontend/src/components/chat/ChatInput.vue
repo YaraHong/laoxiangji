@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Promotion } from '@element-plus/icons-vue'
+import {ref} from 'vue'
+import {Promotion} from '@element-plus/icons-vue'
 
 const emit = defineEmits<{
   send: [text: string]

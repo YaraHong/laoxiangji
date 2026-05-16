@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import {computed} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 
 const route = useRoute()

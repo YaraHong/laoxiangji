@@ -1,5 +1,5 @@
 import api from './index'
-import type { FAQItem, KnowledgeDocument } from '@/types/knowledge'
+import type {FAQItem, KnowledgeDocument} from '@/types/knowledge'
 
 export function uploadDocument(file: File, docType: string) {
   const form = new FormData()

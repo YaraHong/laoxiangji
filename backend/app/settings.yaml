@@ -60,7 +60,7 @@ text_splitter:
 prompts:
   base_path: "prompts/"
   templates:
-    chat_system: "chat_system_prompt.txt"
+    chat_system: "chat_prompt.txt"
     rag_system: "rag_system_prompt.txt"
     lead_hint: "lead_hint_prompt.txt"
     intent_recognition: "intent_recognition_prompt.txt"

@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { UploadFilled } from '@element-plus/icons-vue'
-import {
-  createFAQ,
-  listDocuments,
-  listFAQ,
-  reEmbedDocument,
-  toggleDocument,
-  uploadDocument,
-} from '@/api/knowledge'
-import type { FAQItem, KnowledgeDocument } from '@/types/knowledge'
+import {onMounted, ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {UploadFilled} from '@element-plus/icons-vue'
+import {createFAQ, listDocuments, listFAQ, reEmbedDocument, toggleDocument, uploadDocument,} from '@/api/knowledge'
+import type {FAQItem, KnowledgeDocument} from '@/types/knowledge'
 
 const activeTab = ref('documents')
 const documents = ref<KnowledgeDocument[]>([])

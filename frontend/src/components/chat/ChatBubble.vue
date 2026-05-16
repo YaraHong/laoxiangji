@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Message } from '@/types/chat'
+import type {Message} from '@/types/chat'
 import CitationList from './CitationList.vue'
 
 defineProps<{ message: Message }>()

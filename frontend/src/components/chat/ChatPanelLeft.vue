@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import {ref} from 'vue'
 import CooperationProcess from './CooperationProcess.vue'
 import QuickQuestions from './QuickQuestions.vue'
 

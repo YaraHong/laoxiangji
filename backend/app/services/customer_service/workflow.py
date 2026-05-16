@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services import save_user_message, get_cached_messages
 from app.services.customer_service.node import CustomerServiceNode
 from app.services.customer_service.overall_state_private import OverallStatePrivate
+from app.utils.logger_handle import logger
 
 
 async def run_customer_pipeline(db: AsyncSession, session_id, content):
@@ -66,6 +67,7 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     # 编译图
     graph = builder.compile()
 
+    logger.info(graph.get_graph().draw_ascii())
     # 初始化状态
     state = OverallStatePrivate(
         user_message=content,

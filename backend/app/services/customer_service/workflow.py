@@ -42,8 +42,8 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
         "intent_recognition",
         CustomerServiceNode.should_escalate_to_human,
         {
-            "human_handling_node": "human_handling_node",
-            "should_use_vector_search": "routing_decision"
+            True: "human_handling_node",
+            False: "routing_decision"
         }
     )
 

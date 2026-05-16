@@ -23,7 +23,7 @@ class CustomerServiceNode:
         """
         # 记录开始时间
         start_time = time.time()
-        logger.info(f"【意图识别开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info("【意图识别开始】")
         logger.info(f"当前状态：{state}")
         try:
             # 构建chain
@@ -65,23 +65,8 @@ class CustomerServiceNode:
 
     @staticmethod
     def should_escalate_to_human(state: OverallStatePrivate):
-        """
-        判断是否需要人工，如果需要人工就跳转人工
-        """
-        start_time = time.time()
-        logger.info(f"【should_escalate_to_human开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        escalate_to_human = state.get("escalate_to_human", False)
-
-        if escalate_to_human:
-            result = "human_handling_node"
-        else:
-            result = "should_use_vector_search"
-
-        elapsed_time = time.time() - start_time
-        logger.info(f"【should_escalate_to_human结束】耗时: {elapsed_time:.3f} 秒, 返回: {result}")
-
-        return result
+        return state.get("escalate_to_human", False)
 
     @staticmethod
     def human_handling_node(state: OverallStatePrivate):

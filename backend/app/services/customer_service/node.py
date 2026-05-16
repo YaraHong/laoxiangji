@@ -26,20 +26,21 @@ class CustomerServiceNode:
 
         try:
             # 构建chain
-            logger.info("")
             prompt = load_prompt("intent_recognition.txt")
             template = PromptTemplate.from_template(prompt)
             chain = template | chat_llm | json_output_parser
 
             # 构建对话变量
-            conversation: str = ""
-            for msg in state["messages"]:
-                ""  # 这里可能是需要拼接对话内容的逻辑，请根据实际需求补充
-                pass
+            conversation = "\n".join(
+                f"{'用户' if msg['role'] == 'user' else '大模型'}:{msg['content']}"
+                for msg in state["messages"]
+            )
 
+            conversation += f'\n当前用户消息：{state["user_message"]}'
+            logger.info(f"提示词：\n{template.format(conversation=conversation)}")
             # 解析结果
             llm_output_json = chain.invoke(
-                input={"conversation": state["user_message"]}
+                input={"conversation": conversation}
             )
 
             # 更新状态
@@ -170,6 +171,7 @@ class CustomerServiceNode:
         async for chunk in chat_llm.astream(prompt):
             # 注意：LangGraph 节点返回应该是字典，不是 yield
             # 你需要用回调或特殊处理
+            print(chunk)
             yield chunk  # 这里会有问题
 
         elapsed_time = time.time() - start_time

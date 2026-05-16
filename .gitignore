@@ -30,4 +30,19 @@ Thumbs.db
 dist/
 build/
 *.egg
-/backend/logs/laoxiangji_20260510.log
+
+# Logs
+logs/
+*.log
+
+# Testing / Coverage
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Python version
+.python-version
+
+# Node (safety net)
+node_modules/

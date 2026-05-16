@@ -132,26 +132,29 @@ class CustomerServiceNode:
         """
         构建提示词
         """
-        start_time = time.time()
-        logger.info(f"【build_output_prompt开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        try:
+            start_time = time.time()
+            logger.info(f"【build_output_prompt开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        documents = state.get("retrieved_documents")
+            documents = state.get("retrieved_documents")
 
-        if documents:
-            material = ""
-            for index, document in documents:
-                material += f"参考资料{index}：\n" + document + "\n"
-        else:
-            material = "暂无资料提供"
+            if documents:
+                material = ""
+                for index, document in documents:
+                    material += f"参考资料{index}：\n" + document + "\n"
+            else:
+                material = "暂无资料提供"
 
-        prompt = load_prompt("rag_system_prompt.txt")
-        template = PromptTemplate.from_template(prompt)
-        prompt_value = template.invoke(input={"material": material})
+            prompt = load_prompt("rag_system_prompt.txt")
+            template = PromptTemplate.from_template(prompt)
+            prompt_value = template.invoke(input={"material": material})
 
-        state["prompt"] = prompt_value
+            state["prompt"] = prompt_value
 
-        elapsed_time = time.time() - start_time
-        logger.info(f"【build_output_prompt结束】耗时: {elapsed_time:.3f} 秒")
+            elapsed_time = time.time() - start_time
+            logger.info(f"【build_output_prompt结束】耗时: {elapsed_time:.3f} 秒")
+        except Exception as e:
+            logger.error(e)
 
     @staticmethod
     async def llm_output(state: OverallStatePrivate):

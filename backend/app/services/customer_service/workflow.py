@@ -49,8 +49,8 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
         "routing_decision",  # 源节点：空节点
         CustomerServiceNode.should_use_vector_search,  # 判断函数
         {
-            "vector": "vector_retrieval",  # 需要向量检索
-            "direct": "build_output_prompt"  # 直接构建提示词
+            "vector_retrieval": "vector_retrieval",  # 需要向量检索
+            "build_output_prompt": "build_output_prompt"  # 直接构建提示词
         }
     )
 

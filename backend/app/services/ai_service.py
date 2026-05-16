@@ -1,8 +1,7 @@
 import json
 import re
 from string import Template
-
-from typing import Any, AsyncIterator
+from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 

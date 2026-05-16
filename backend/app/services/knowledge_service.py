@@ -19,7 +19,7 @@ from app.core.minio_client import download_file, upload_file
 from app.models.faq import FAQ
 from app.models.knowledge_chunk import KnowledgeChunk
 from app.models.knowledge_document import KnowledgeDocument
-from app.services.model_factory import create_embedding, get_embedding_model_name
+from app.services.model_factory import create_embedding
 from app.services.text_cleaner import clean_document_text
 
 DOC_TYPE_MAP = {

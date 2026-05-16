@@ -55,8 +55,8 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
         "routing_decision",
         CustomerServiceNode.should_use_vector_search,
         {
-            "vector_retrieval": "vector_retrieval",
-            "build_output_prompt": "build_output_prompt"
+            True: "vector_retrieval",
+            False: "build_output_prompt"
         }
     )
 

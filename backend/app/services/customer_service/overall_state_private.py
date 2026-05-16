@@ -23,7 +23,7 @@ class OverallStatePrivate(TypedDict):
     retrieved_documents: List[str]
 
     # 提示词
-    prompt: PromptValue
+    prompt: str
 
     # 是否需要追问
     need_followup: bool

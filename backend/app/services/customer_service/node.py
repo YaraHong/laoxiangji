@@ -73,33 +73,14 @@ class CustomerServiceNode:
         """
         人工节点
         """
-        start_time = time.time()
-        logger.info(f"【human_handling_node开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-        # TODO 转到人工 ，graph 直接结束
-
-        elapsed_time = time.time() - start_time
-        logger.info(f"【human_handling_node结束】耗时: {elapsed_time:.3f} 秒")
+        logger.info("结束，跳转人工")
 
     @staticmethod
     def should_use_vector_search(state: OverallStatePrivate):
         """
         判断是否需要向量检索
         """
-        start_time = time.time()
-        logger.info(f"【should_use_vector_search开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-        retrieval_required = state.get("retrieval_required", False)
-
-        if retrieval_required:
-            result = "vector_retrieval"
-        else:
-            result = "build_output_prompt"
-
-        elapsed_time = time.time() - start_time
-        logger.info(f"【should_use_vector_search结束】耗时: {elapsed_time:.3f} 秒, 返回: {result}")
-
-        return result
+        return state.get("retrieval_required", False)
 
     @staticmethod
     def vector_retrieval(state: OverallStatePrivate):
@@ -109,7 +90,7 @@ class CustomerServiceNode:
         start_time = time.time()
         logger.info(f"【vector_retrieval开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        state["retrieved_documents"] = ["暂无资料"]
+        # state["retrieved_documents"] = ["暂无资料"]
 
         elapsed_time = time.time() - start_time
         logger.info(f"【vector_retrieval结束】耗时: {elapsed_time:.3f} 秒")
@@ -119,46 +100,41 @@ class CustomerServiceNode:
         """
         构建提示词
         """
-        try:
-            start_time = time.time()
-            logger.info(f"【build_output_prompt开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info("【构建提示词开始】")
+        retrieval_required = state.get("retrieval_required", False)
+        documents = state.get("retrieved_documents")
 
-            documents = state.get("retrieved_documents")
-
-            if documents:
-                material = ""
-                for index, document in documents:
-                    material += f"参考资料{index}：\n" + document + "\n"
+        if retrieval_required and documents is not None:
+            material = ""
+            if isinstance(documents, list):
+                for index, document in enumerate(documents):
+                    material += f"参考资料{index + 1}：\n" + document + "\n"
             else:
                 material = "暂无资料提供"
+        else:
+            material = "暂无资料提供"
 
-            prompt = load_prompt("rag_system_prompt.txt")
-            template = PromptTemplate.from_template(prompt)
-            prompt_value = template.invoke(input={"material": material})
+        prompt = load_prompt("rag_system_prompt.txt")
+        template = PromptTemplate.from_template(prompt)
 
-            state["prompt"] = prompt_value
+        formatted_prompt = template.format(material=material)
 
-            elapsed_time = time.time() - start_time
-            logger.info(f"【build_output_prompt结束】耗时: {elapsed_time:.3f} 秒")
-        except Exception as e:
-            logger.error(e)
+        logger.info(f"提示词：\n{formatted_prompt}")
+
+        # 存储字符串格式的提示词
+        state["prompt"] = formatted_prompt  # 存储字符串而不是 prompt_value
 
     @staticmethod
     async def llm_output(state: OverallStatePrivate):
         """
         调用大模型输出
         """
+        logger.info("【调用大模型输出最终结果开始】")
         start_time = time.time()
-        logger.info(f"【llm_output开始】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         prompt = state.get("prompt", "")
-
-        # 异步流式输出
         async for chunk in chat_llm.astream(prompt):
-            # 注意：LangGraph 节点返回应该是字典，不是 yield
-            # 你需要用回调或特殊处理
-            print(chunk)
-            yield chunk  # 这里会有问题
+            yield chunk
 
         elapsed_time = time.time() - start_time
-        logger.info(f"【llm_output结束】耗时: {elapsed_time:.3f} 秒")
+        logger.info(f"【调用大模型输出最终结果结束】耗时: {elapsed_time:.3f} 秒")

@@ -80,6 +80,15 @@ async def stream_chat_message(
         db: AsyncSession = Depends(get_db),
 ):
     return StreamingResponse(
-        run_customer_pipeline(db, session_id, request.content),
+        run_customer_pipeline(
+            db,
+            session_id,
+            request.content
+        ),
         media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
     )

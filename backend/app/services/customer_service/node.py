@@ -1,11 +1,12 @@
 import json
 import time
 
+from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.services.model_factory import chat_llm
+from app.services.model_factory import chat_llm, streaming_chat_llm
 from app.services.prompt_loader import load_prompt
 from app.utils.logger_handle import logger
 
@@ -33,12 +34,16 @@ class CustomerServiceNode:
 
             # 构建对话变量
             conversation = "\n".join(
-                f"{'用户' if msg['role'] == 'user' else '大模型'}:{msg['content']}"
+                f"{'用户' if isinstance(msg, HumanMessage) else '大模型'}: {msg.content}"
                 for msg in state["messages"]
             )
 
-            conversation += f'\n当前用户消息：{state["user_message"]}'
-            logger.info(f"提示词：\n{template.format(conversation=conversation)}")
+            conversation += f"\n当前用户消息：{state['user_message']}"
+
+            logger.info(
+                f"提示词：\n{template.format(conversation=conversation)}"
+            )
+
             # 解析结果
             llm_output_json = chain.invoke(
                 input={"conversation": conversation}
@@ -121,20 +126,22 @@ class CustomerServiceNode:
 
         logger.info(f"提示词：\n{formatted_prompt}")
 
-        # 存储字符串格式的提示词
-        state["prompt"] = formatted_prompt  # 存储字符串而不是 prompt_value
+        state["messages"].append(
+            HumanMessage(content=formatted_prompt)
+        )
 
-    @staticmethod
-    async def llm_output(state: OverallStatePrivate):
-        """
-        调用大模型输出
-        """
-        logger.info("【调用大模型输出最终结果开始】")
-        start_time = time.time()
+        return state
 
-        prompt = state.get("prompt", "")
-        async for chunk in chat_llm.astream(prompt):
-            yield chunk
-
-        elapsed_time = time.time() - start_time
-        logger.info(f"【调用大模型输出最终结果结束】耗时: {elapsed_time:.3f} 秒")
+    # @staticmethod
+    # async def llm_output(state: OverallStatePrivate):
+    #     """
+    #     调用大模型输出
+    #     """
+    #
+    #     prompt = state.get("prompt", "")
+    #
+    #     llm_output = await streaming_chat_llm.ainvoke(prompt)
+    #
+    #     state["llm_output"] = llm_output.content
+    #
+    #     return state

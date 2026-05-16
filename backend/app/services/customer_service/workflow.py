@@ -1,5 +1,6 @@
 import json
 
+from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services import save_user_message, get_cached_messages
 from app.services.customer_service.node import CustomerServiceNode
 from app.services.customer_service.overall_state_private import OverallStatePrivate
+from app.services.model_factory import streaming_chat_llm
 from app.utils.logger_handle import logger
 
 
@@ -16,6 +18,12 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
 
     # 获取最近10轮对话
     history_msg = await get_cached_messages(db, session_id)
+    messages = []
+    for msg in history_msg:
+        if msg["role"] == "user":
+            messages.append(HumanMessage(content=msg["content"]))
+        else:
+            messages.append(AIMessage(content=msg["content"]))
 
     # 构建图
     builder = StateGraph(OverallStatePrivate)
@@ -29,7 +37,14 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     # 构建提示词节点
     builder.add_node("build_output_prompt", CustomerServiceNode.build_output_prompt)
     # 大模型输出节点
-    builder.add_node("llm_output", CustomerServiceNode.llm_output)
+    builder.add_node(
+        "llm_output",
+        lambda state: state["messages"]
+    )
+    builder.add_node(
+        "chat_model",
+        streaming_chat_llm
+    )
 
     # 用来衔接两个条件边
     builder.add_node("routing_decision", lambda state: state)  # 空节点，什么都不做
@@ -71,13 +86,18 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     # 初始化状态
     state = OverallStatePrivate(
         user_message=content,
-        messages=history_msg,
+        messages=messages,
         intent=None,
         retrieval_required=False,
         escalate_to_human=False,
         need_followup=False,
     )
 
-    # 执行
-    async for chunk in graph.astream(state):
-        yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+    # 真正流式输出
+    async for msg, metadata in graph.astream(state, stream_mode="messages-tuple"):
+        if not msg.content:
+            continue
+
+        print(msg.content)
+
+        yield f"data: {msg.content}\n\n"

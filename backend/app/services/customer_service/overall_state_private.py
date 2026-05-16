@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Optional
 
-from langchain_core.prompt_values import PromptValue
+from langchain_core.messages import BaseMessage
 
 
 class OverallStatePrivate(TypedDict):
@@ -8,7 +8,7 @@ class OverallStatePrivate(TypedDict):
     user_message: str
 
     # 对话历史
-    messages: List[dict]
+    messages: List[BaseMessage]
 
     # 当前意图
     intent: Optional[str]
@@ -24,6 +24,9 @@ class OverallStatePrivate(TypedDict):
 
     # 提示词
     prompt: str
+
+    # 大模型输出
+    llm_output: str
 
     # 是否需要追问
     need_followup: bool

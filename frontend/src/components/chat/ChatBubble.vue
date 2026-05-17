@@ -4,9 +4,101 @@ import CitationList from './CitationList.vue'
 
 defineProps<{ message: Message }>()
 
+function isSeparatorCell(cell: string): boolean {
+  return /^:?-{3,}:?$/.test(cell)
+}
+
+function parseTableRow(line: string): string[] {
+  return line
+      .trim()
+      .replace(/^\||\|$/g, '')
+      .split('|')
+      .map(c => c.trim())
+}
+
+function getAlign(cell: string): string {
+  if (cell.startsWith(':') && cell.endsWith(':')) return 'center'
+  if (cell.endsWith(':')) return 'right'
+  return 'left'
+}
+
+function convertMarkdownTable(block: string): string {
+  const lines = block.trim().split('\n')
+  if (lines.length < 2) return block
+
+  const headerCells = parseTableRow(lines[0])
+  const sepCells = parseTableRow(lines[1])
+  if (!sepCells.every(isSeparatorCell)) return block
+
+  const colCount = headerCells.length
+  const aligns = sepCells.map(getAlign)
+
+  // 拆分粘在一起的行（大模型常在部分行之间遗漏 || 边界）
+  const rawRows = lines.slice(2).flatMap(line => {
+    const cells = parseTableRow(line)
+    if (cells.length <= colCount) return [cells]
+    const groups: string[][] = []
+    for (let i = 0; i < cells.length; i += colCount) {
+      groups.push(cells.slice(i, i + colCount))
+    }
+    return groups
+  })
+  const dataRows = rawRows.filter(r => !r.every(isSeparatorCell))
+
+  const thStyle = (a: string) => a !== 'left' ? ` style="text-align:${a}"` : ''
+  const tdStyle = (a: string) => a !== 'left' ? ` style="text-align:${a}"` : ''
+
+  let html = '<div class="table-wrap"><table><thead><tr>'
+  headerCells.forEach((c, i) => {
+    html += `<th${thStyle(aligns[i])}>${escapeHtml(c)}</th>`
+  })
+  html += '</tr></thead><tbody>'
+  dataRows.forEach(row => {
+    html += '<tr>'
+    row.forEach((c, i) => {
+      html += `<td${tdStyle(aligns[i] || 'left')}>${escapeHtml(c)}</td>`
+    })
+    html += '</tr>'
+  })
+  html += '</tbody></table></div>'
+  return html
+}
+
+function normalizeInlineTables(text: string): string {
+  return text.replace(/[^\n|]*\|.+\|[^\n|]*/g, (segment) => {
+    if (!segment.includes('||')) return segment
+    const firstPipe = segment.indexOf('|')
+    const lastPipe = segment.lastIndexOf('|')
+    const prefix = segment.slice(0, firstPipe)
+    const suffix = segment.slice(lastPipe + 1)
+    const table = segment.slice(firstPipe, lastPipe + 1)
+
+    // 按 || 拆分各行（保留完整管道）
+    let tableLines = table.replace(/\|\|/g, '|\n|')
+
+    // 修复粘在一起的行：分隔符 --- 后面紧挨数据列时切开
+    // |------|------|------|加盟费 → |------|------|------|\n|加盟费
+    tableLines = tableLines.replace(/(:\?-{3,}:?\|)([^\s\-|])/g, '$1\n|$2')
+
+    const normalized = tableLines
+    return (prefix ? prefix + '\n' : '') + normalized + (suffix ? '\n' + suffix : '')
+  })
+}
+
 function renderContent(content: string, role: string): string {
   if (role !== 'assistant') return escapeHtml(content)
-  return content
+
+  content = normalizeInlineTables(content)
+
+  const tablePlaceholders: string[] = []
+
+  content = content.replace(/(?:^\|.+?\|[ \t]*$\n?)+/gm, (match) => {
+    const idx = tablePlaceholders.length
+    tablePlaceholders.push(convertMarkdownTable(match))
+    return `%%TBL_${idx}%%`
+  })
+
+  let html = content
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -17,6 +109,12 @@ function renderContent(content: string, role: string): string {
       .replace(/^- (.+)/gm, '<li>$1</li>')
       .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
       .replace(/\n/g, '<br>')
+
+  tablePlaceholders.forEach((th, i) => {
+    html = html.replace(`%%TBL_${i}%%`, th)
+  })
+
+  return html
 }
 
 function escapeHtml(text: string): string {
@@ -127,6 +225,38 @@ function escapeHtml(text: string): string {
 
 .content {
   white-space: pre-wrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.assistant-content :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.assistant-content :deep(th) {
+  background: #f5f7fa;
+  font-weight: 600;
+  border: 1px solid #e0e0e0;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.assistant-content :deep(td) {
+  border: 1px solid #e5e5e5;
+  padding: 5px 10px;
+}
+
+.assistant-content :deep(tr:nth-child(even) td) {
+  background: #fafafa;
+}
+
+.assistant-content {
+  overflow-x: auto;
 }
 
 .assistant-content :deep(h1),

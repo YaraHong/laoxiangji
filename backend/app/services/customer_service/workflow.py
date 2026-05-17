@@ -81,7 +81,7 @@ async def run_customer_pipeline(
 
     graph = builder.compile()
 
-    logger.info(graph.get_graph().draw_ascii())
+    logger.info(f"\n{graph.get_graph().draw_ascii()}")
 
     state = OverallStatePrivate(
         user_message=content,

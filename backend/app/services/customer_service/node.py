@@ -1,4 +1,3 @@
-import asyncio
 import time
 from typing import Dict, AsyncGenerator
 
@@ -118,18 +117,12 @@ async def llm_output_node(state: OverallStatePrivate) -> AsyncGenerator[Dict[str
 
     full_response = ""
 
-    try:
-        async for chunk in streaming_chat_llm.astream(messages):
-            if chunk.content:
-                full_response += chunk.content
-                yield {"llm_output": chunk.content}
+    async for chunk in streaming_chat_llm.astream(messages):
+        if chunk.content:
+            full_response += chunk.content
+            yield {"llm_output": chunk.content}
 
-        logger.info(f"【LLM输出结束】输出长度: {len(full_response)}字符")
-        yield {"llm_output_final": full_response}
-
-    except Exception as e:
-        logger.error(f"LLM输出失败: {e}")
-        yield {"llm_output_final": f"生成回复失败：{str(e)}"}
+    yield {"llm_output_final": full_response}
 
 
 async def save_message(state: OverallStatePrivate) -> OverallStatePrivate:
@@ -137,14 +130,7 @@ async def save_message(state: OverallStatePrivate) -> OverallStatePrivate:
     logger.info("【保存消息开始】")
 
     try:
-        # TODO: 替换为实际的消息保存逻辑
-        await asyncio.sleep(0.1)  # 模拟异步操作
-
-        # 保存用户消息和AI回复到数据库
-        # await message_repository.save(state["user_message"], state.get("llm_output_final"))
-
-        logger.info("【保存消息结束】")
-
+        pass
     except Exception as e:
         logger.error(f"保存消息失败: {e}")
 
@@ -153,22 +139,12 @@ async def save_message(state: OverallStatePrivate) -> OverallStatePrivate:
 
 async def conversation_analysis(state: OverallStatePrivate) -> OverallStatePrivate:
     """
-    对话分析节点：分析对话质量、用户满意度等
-
-    可在对话结束后进行异步分析
+    对话分析接单
     """
     logger.info("【对话分析开始】")
 
     try:
-        # TODO: 替换为实际的分析逻辑
-        await asyncio.sleep(0.1)  # 模拟异步操作
-
-        # 分析对话意图识别准确率、回复质量等
-        # analysis_result = analyze_conversation(state)
-
-        logger.info("【对话分析结束】")
-
+        pass
     except Exception as e:
         logger.error(f"对话分析失败: {e}")
-
     return state

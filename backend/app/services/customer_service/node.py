@@ -6,7 +6,8 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from app.core.logger_handle import logger
-from app.core.model_factory import streaming_chat_llm, intent_llm
+from app.core.milvus import get_collection
+from app.core.model_factory import streaming_chat_llm, intent_llm, openai_client
 from app.services.customer_service.overall_state_private import OverallStatePrivate
 from app.services.prompt_loader import load_prompt
 
@@ -62,13 +63,59 @@ def human_handling_node(state: OverallStatePrivate) -> OverallStatePrivate:
 
 
 def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
-    """
-    向量检索节点
-    """
     try:
-        logger.info("【向量检索开始】")
+        logger.info("【向量检索开始 - Milvus】")
+
+        prompt = load_prompt("context_rewriting.txt")
+        template = PromptTemplate.from_template(prompt)
+        chain = template | intent_llm | json_output_parser
+
+        result_json = chain.invoke(
+            input={"user_input": state["user_message"]}
+        )
+
+        query = result_json.get("query_rewrite", state["user_message"])
+        doctype = result_json.get("doctype", [])
+
+        logger.info(f"query: {query}")
+        logger.info(f"doctype: {doctype}")
+
+        embedding_response = openai_client.embeddings.create(
+            model='Qwen/Qwen3-Embedding-8B',
+            input=query,
+            encoding_format="float",
+            dimensions=1024
+        )
+
+        pure_vector = embedding_response.data[0].embedding
+
+        expr = None
+        if doctype:
+            doctype_str = ", ".join([f"'{d}'" for d in doctype])
+            expr = f"doc_type in [{doctype_str}]"
+
+        col = get_collection()
+
+        results = col.search(
+            data=[pure_vector],
+            anns_field="vector",
+            param={
+                "metric_type": "IP",
+                "params": {"nprobe": 10}
+            },
+            limit=5,
+            expr=expr,
+            output_fields=["content", "doc_type"]
+        )
+
+        state["retrieved_documents"] = results
+
+        logger.info("【向量检索完成 - Milvus】")
+
     except Exception as e:
-        logger.error(f"向量检索失败: {e}")
+        logger.error(f"向量检索失败: {e}", exc_info=True)
+        state["retrieved_documents"] = []
+
     return state
 
 

@@ -5,7 +5,7 @@ from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.services.model_factory import chat_llm
+from app.services.model_factory import chat_llm, streaming_chat_llm
 from app.services.prompt_loader import load_prompt
 from app.utils.logger_handle import logger
 
@@ -129,16 +129,16 @@ class CustomerServiceNode:
 
         return state
 
-    # @staticmethod
-    # async def llm_output(state: OverallStatePrivate):
-    #     """
-    #     调用大模型输出
-    #     """
-    #
-    #     prompt = state.get("prompt", "")
-    #
-    #     llm_output = await streaming_chat_llm.ainvoke(prompt)
-    #
-    #     state["llm_output"] = llm_output.content
-    #
-    #     return state
+    @staticmethod
+    async def llm_output(state: OverallStatePrivate):
+        """
+        调用大模型输出
+        """
+
+        prompt = state.get("prompt", "")
+
+        llm_output = await streaming_chat_llm.ainvoke(prompt)
+
+        state["llm_output"] = llm_output.content
+
+        return state

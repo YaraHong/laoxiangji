@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services import save_user_message, get_cached_messages
 from app.services.customer_service.node import CustomerServiceNode
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.services.model_factory import streaming_chat_llm
 from app.utils.logger_handle import logger
 
 
@@ -35,14 +34,7 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     # 构建提示词节点
     builder.add_node("build_output_prompt", CustomerServiceNode.build_output_prompt)
     # 大模型输出节点
-    builder.add_node(
-        "llm_output",
-        lambda state: state["messages"]
-    )
-    builder.add_node(
-        "chat_model",
-        streaming_chat_llm
-    )
+    builder.add_node("llm_output", CustomerServiceNode.llm_output)
 
     # 用来衔接两个条件边
     builder.add_node("routing_decision", lambda state: state)  # 空节点，什么都不做
@@ -95,7 +87,4 @@ async def run_customer_pipeline(db: AsyncSession, session_id, content):
     async for msg, metadata in graph.astream(state, stream_mode="messages-tuple"):
         if not msg.content:
             continue
-
-        print(msg.content)
-
         yield f"data: {msg.content}\n\n"

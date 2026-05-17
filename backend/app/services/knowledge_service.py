@@ -71,7 +71,6 @@ async def _process_document(
             col = get_collection()
 
             texts = [clean_document_text(c.page_content) for c in all_chunks]
-            # 过滤掉清理后为空的chunk
             texts = [t for t in texts if t]
             vectors: list[list] = []
             batch_size = 20
@@ -80,7 +79,8 @@ async def _process_document(
                 batch_vectors = openai_client.embeddings.create(
                     model='Qwen/Qwen3-Embedding-8B',
                     input=batch,
-                    encoding_format="float"
+                    encoding_format="float",
+                    dimensions=1024
                 )
                 vectors.extend([e.embedding for e in batch_vectors.data])
                 logger.debug(
@@ -112,6 +112,8 @@ async def _process_document(
 
         doc.status = "ready"
         logger.info("文档处理完成: id=%d, title=%s, chunks=%d", doc.id, title, chunk_count)
+    except Exception as ex:
+        logger.error(ex)
     finally:
         os.unlink(tmp_path)
 

@@ -23,17 +23,17 @@ redis:
 # AI 模型配置
 models:
   chat:
-    api_key: "your-dashscope-api-key"
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    model_name: "qwen3.5-plus"
+    api_key: "sk-c882730bd0204687a6c1b45cde0c1f83"
+    base_url: "https://api.deepseek.com"
+    model_name: "deepseek-v4-pro"
   embedding:
     api_key: "your-dashscope-api-key"
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
     model_name: "Qwen3-Embedding-8B"
   intent:
-    api_key: "your-dashscope-api-key"
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    model_name: "Qwen3-Embedding-8B"
+    api_key: "sk-c882730bd0204687a6c1b45cde0c1f83"
+    base_url: "https://api.deepseek.com"
+    model_name: "deepseek-v4-flash"
 
 # Milvus 向量数据库
 milvus:

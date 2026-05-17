@@ -1,7 +1,4 @@
-from langchain_core.messages import (
-    HumanMessage,
-    AIMessage
-)
+from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from sqlalchemy.ext.asyncio import AsyncSession

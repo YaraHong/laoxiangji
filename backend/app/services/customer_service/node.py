@@ -5,8 +5,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
+from app.core.model_factory import streaming_chat_llm, intent_llm
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.core.model_factory import chat_llm, streaming_chat_llm
 from app.services.prompt_loader import load_prompt
 from app.utils.logger_handle import logger
 
@@ -22,7 +22,7 @@ def intent_recognition(state: OverallStatePrivate) -> OverallStatePrivate:
     # 构建chain
     prompt = load_prompt("intent_recognition.txt")
     template = PromptTemplate.from_template(prompt)
-    chain = template | chat_llm | json_output_parser
+    chain = template | intent_llm | json_output_parser
 
     # 构建对话历史上下文
     conversation = "\n".join(

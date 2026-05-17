@@ -23,12 +23,18 @@ class RedisSettings(BaseModel):
     url: str = "redis://localhost:6379/0"
 
 
-class ModelSettings(BaseModel):
+class ModelItemSettings(BaseModel):
+    """单个模型配置"""
     api_key: str = ""
     base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    chat_name: str = "qwen-plus"
-    embedding_name: str = "text-embedding-v3"
-    request_timeout: int = 120
+    model_name: str = ""
+
+
+class ModelsSettings(BaseModel):
+    """AI 模型配置集合"""
+    chat: ModelItemSettings = Field(default_factory=ModelItemSettings)
+    embedding: ModelItemSettings = Field(default_factory=ModelItemSettings)
+    intent: ModelItemSettings = Field(default_factory=ModelItemSettings)
 
 
 class MilvusSettings(BaseModel):
@@ -74,7 +80,7 @@ class AppConfig(BaseModel):
     debug: bool = False
     db: DbSettings = Field(default_factory=DbSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
-    model: ModelSettings = Field(default_factory=ModelSettings)
+    models: ModelsSettings = Field(default_factory=ModelsSettings)
     milvus: MilvusSettings = Field(default_factory=MilvusSettings)
     minio: MinioSettings = Field(default_factory=MinioSettings)
     celery: CelerySettings = Field(default_factory=CelerySettings)
@@ -93,7 +99,11 @@ class AppConfig(BaseModel):
             debug=config_data.get("app", {}).get("debug", False),
             db=DbSettings(**config_data.get("database", {})),
             redis=RedisSettings(**config_data.get("redis", {})),
-            model=ModelSettings(**config_data.get("model", {})),
+            models=ModelsSettings(
+                chat=ModelItemSettings(**config_data.get("models", {}).get("chat", {})),
+                embedding=ModelItemSettings(**config_data.get("models", {}).get("embedding", {})),
+                intent=ModelItemSettings(**config_data.get("models", {}).get("intent", {})),
+            ),
             milvus=MilvusSettings(**config_data.get("milvus", {})),
             minio=MinioSettings(**config_data.get("minio", {})),
             celery=CelerySettings(**config_data.get("celery", {})),

@@ -66,6 +66,7 @@ async def _process_document(
         all_chunks = _splitter.split_documents(raw_docs)
         logger.info("文档分块完成: %s, chunks=%d", save_name, len(all_chunks))
 
+        chunk_count = 0
         if all_chunks:
             col = get_collection()
 
@@ -107,12 +108,10 @@ async def _process_document(
             col.insert(columns)
             col.flush()
 
-            doc.chunk_count = len(texts)
-        else:
-            doc.chunk_count = 0
+            chunk_count = len(texts)
 
         doc.status = "ready"
-        logger.info("文档处理完成: id=%d, title=%s, chunks=%d", doc.id, title, doc.chunk_count)
+        logger.info("文档处理完成: id=%d, title=%s, chunks=%d", doc.id, title, chunk_count)
     finally:
         os.unlink(tmp_path)
 
@@ -132,7 +131,7 @@ async def upload_document(db: AsyncSession, file: UploadFile, doc_type: str):
     title = safe_name.rsplit(".", 1)[0] if "." in safe_name else safe_name
     doc = KnowledgeDocument(
         title=title,
-        file_name=save_name,
+        file_url=save_name,
         doc_type=doc_type,
         status="processing",
     )
@@ -153,7 +152,7 @@ async def upload_document(db: AsyncSession, file: UploadFile, doc_type: str):
 
 async def list_documents(db: AsyncSession) -> list[KnowledgeDocument]:
     result = await db.execute(
-        select(KnowledgeDocument).order_by(KnowledgeDocument.uploaded_at.desc())
+        select(KnowledgeDocument).order_by(KnowledgeDocument.created_at.desc())
     )
     return list(result.scalars().all())
 
@@ -165,6 +164,8 @@ async def re_embed_document(db: AsyncSession, doc_id: int) -> KnowledgeDocument:
     doc = result.scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="文档不存在")
+    if not doc.file_url:
+        raise HTTPException(status_code=400, detail="文档无文件路径，无法重新向量化")
 
     col = get_collection()
     col.delete(f'doc_id == {doc_id}')
@@ -181,7 +182,7 @@ async def re_embed_document(db: AsyncSession, doc_id: int) -> KnowledgeDocument:
     await db.flush()
 
     try:
-        await _process_document(doc.file_name, doc.title, doc.doc_type, doc, db)
+        await _process_document(doc.file_url, doc.title, doc.doc_type, doc, db)
     except Exception as e:
         logger.exception("文档重新向量化失败: doc_id=%d", doc_id)
         doc.status = "error"

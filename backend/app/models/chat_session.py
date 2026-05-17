@@ -14,6 +14,7 @@ class ChatSession(Base):
     session_no: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     channel: Mapped[str] = mapped_column(String(32), default="web", nullable=False)
     visitor_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    lead_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
     status: Mapped[str] = mapped_column(String(24), default="active", nullable=False)
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -14,7 +14,7 @@ class ChatMessage(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     session_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("chat_session.id"), nullable=False)
-    role: Mapped[str] = mapped_column("role", String(24), nullable=False)
+    role: Mapped[str] = mapped_column(String(24), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     message_type: Mapped[str] = mapped_column(String(24), default="text", nullable=False)
     confidence: Mapped[float | None] = mapped_column(Numeric(5, 4), nullable=True)

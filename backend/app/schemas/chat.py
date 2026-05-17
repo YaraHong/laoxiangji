@@ -40,6 +40,7 @@ class SessionInfo(BaseModel):
     session_no: str
     channel: str
     visitor_id: str | None
+    lead_id: int | None = None
     status: str
     summary: str | None
     last_message_at: datetime | None

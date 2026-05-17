@@ -4,13 +4,14 @@ from pydantic import BaseModel, Field
 class DocumentItem(BaseModel):
     id: int
     title: str
-    file_name: str
+    file_url: str | None = None
     doc_type: str
     version: str
     status: str
-    chunk_count: int
+    chunk_count: int = 0
     enabled: bool
-    uploaded_at: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -23,6 +24,7 @@ class FAQItem(BaseModel):
     priority: int
     enabled: bool
     created_at: str | None = None
+    updated_at: str | None = None
 
     model_config = {"from_attributes": True}
 

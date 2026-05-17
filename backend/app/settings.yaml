@@ -21,14 +21,19 @@ redis:
   url: redis://:121221@localhost:6379/0
 
 # AI 模型配置
-model:
-  api_key: xxx
-  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
-  #  chat_name: qwen-plus
-  chat_name: qwen3.5-plus
-  #  embedding_name: text-embedding-v3
-  embedding_name: Qwen3-Embedding-8B
-  request_timeout: 120
+models:
+  chat:
+    api_key: "your-dashscope-api-key"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model_name: "qwen3.5-plus"
+  embedding:
+    api_key: "your-dashscope-api-key"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model_name: "Qwen3-Embedding-8B"
+  intent:
+    api_key: "your-dashscope-api-key"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model_name: "Qwen3-Embedding-8B"
 
 # Milvus 向量数据库
 milvus:

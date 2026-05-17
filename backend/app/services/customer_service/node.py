@@ -6,7 +6,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.services.model_factory import chat_llm, streaming_chat_llm
+from app.core.model_factory import chat_llm, streaming_chat_llm
 from app.services.prompt_loader import load_prompt
 from app.utils.logger_handle import logger
 
@@ -19,36 +19,30 @@ def intent_recognition(state: OverallStatePrivate) -> OverallStatePrivate:
     """
     start_time = time.time()
     logger.info("【意图识别开始】")
+    # 构建chain
+    prompt = load_prompt("intent_recognition.txt")
+    template = PromptTemplate.from_template(prompt)
+    chain = template | chat_llm | json_output_parser
 
-    try:
-        # 构建chain
-        prompt = load_prompt("intent_recognition.txt")
-        template = PromptTemplate.from_template(prompt)
-        chain = template | chat_llm | json_output_parser
+    # 构建对话历史上下文
+    conversation = "\n".join(
+        f"{'用户' if isinstance(msg, HumanMessage) else 'AI'}: {msg.content}"
+        for msg in state["messages"]
+    )
+    conversation += f"\n当前用户消息：{state['user_message']}"
 
-        # 构建对话历史上下文
-        conversation = "\n".join(
-            f"{'用户' if isinstance(msg, HumanMessage) else 'AI'}: {msg.content}"
-            for msg in state["messages"]
-        )
-        conversation += f"\n当前用户消息：{state['user_message']}"
+    # 调用LLM进行意图识别
+    llm_output = chain.invoke(input={"conversation": conversation})
 
-        # 调用LLM进行意图识别
-        llm_output = chain.invoke(input={"conversation": conversation})
+    # 更新状态
+    state["intent"] = llm_output.get("intent")
+    state["retrieval_required"] = llm_output.get("retrieval_required", False)
+    state["escalate_to_human"] = llm_output.get("escalate_to_human", False)
 
-        # 更新状态
-        state["intent"] = llm_output.get("intent")
-        state["retrieval_required"] = llm_output.get("retrieval_required", False)
-        state["escalate_to_human"] = llm_output.get("escalate_to_human", False)
+    elapsed_time = time.time() - start_time
+    logger.info(f"【意图识别结束】意图: {state['intent']}, 耗时: {elapsed_time:.3f}秒")
 
-        elapsed_time = time.time() - start_time
-        logger.info(f"【意图识别结束】意图: {state['intent']}, 耗时: {elapsed_time:.3f}秒")
-
-        return state
-
-    except Exception as e:
-        logger.exception(f"意图识别失败: {e}")
-        raise
+    return state
 
 
 def should_escalate_to_human(state: OverallStatePrivate) -> bool:

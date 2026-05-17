@@ -3,7 +3,7 @@ from typing import Any
 from app.core.logger_handle import logger
 from app.core.milvus import get_collection
 from app.services.ai_service import build_messages
-from app.services.model_factory import embed_query
+from app.core.model_factory import embed_query
 
 
 def _build_references(chunks: list[dict]) -> str:

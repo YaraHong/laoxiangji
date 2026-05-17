@@ -104,7 +104,7 @@ async def trait_extraction(
         conversation = _build_conversation_text(messages)
         template = PromptTemplate.from_template(prompt)
         chain = template | chat_llm | json_output_parser
-        result_json = chain.invoke(input={"conversation": conversation})
+        result_json = await chain.ainvoke(input={"conversation": conversation})
 
         await set_profile_hint(session_id, result_json)
 

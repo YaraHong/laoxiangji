@@ -63,15 +63,15 @@ def human_handling_node(state: OverallStatePrivate) -> OverallStatePrivate:
     return state
 
 
-def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
+async def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
     try:
-        logger.info("【向量检索开始 - Milvus】")
+        logger.info("【向量检索开始】")
 
         prompt = load_prompt("context_rewriting.txt")
         template = PromptTemplate.from_template(prompt)
         chain = template | intent_llm | json_output_parser
 
-        result_json = chain.invoke(
+        result_json = await chain.ainvoke(
             input={"user_input": state["user_message"]}
         )
 

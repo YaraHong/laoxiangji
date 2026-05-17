@@ -42,7 +42,7 @@ async def save_or_update_lead(db: AsyncSession, session_id: int, lead_data: dict
             city=lead_data["city"],
             source_channel=None,
             intent_level=lead_data["intent_level"],
-            score=lead_data["intent_score"],
+            score=None,
             follow_status=None,
             assigned_consultant_id=None,
             latest_session_id=session_id,

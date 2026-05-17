@@ -106,8 +106,6 @@ async def trait_extraction(
         chain = template | chat_llm | json_output_parser
         result_json = chain.invoke(input={"conversation": conversation})
 
-        print(result_json)
-
         await set_profile_hint(session_id, result_json)
 
         # 持久化到数据库：查找或创建线索

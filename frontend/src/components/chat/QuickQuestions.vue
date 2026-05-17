@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 const emit = defineEmits<{ 'select-question': [text: string] }>()
 
 const questions = [
@@ -15,10 +15,10 @@ const questions = [
     <h3 class="section-title">快捷问题</h3>
     <div class="question-chips">
       <button
-        v-for="q in questions"
-        :key="q"
-        class="chip"
-        @click="emit('select-question', q)"
+          v-for="q in questions"
+          :key="q"
+          class="chip"
+          @click="emit('select-question', q)"
       >
         {{ q }}
       </button>
@@ -33,11 +33,13 @@ const questions = [
   color: #333;
   margin: 0 0 8px 0;
 }
+
 .question-chips {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .chip {
   font-size: 12px;
   width: 100%;
@@ -52,6 +54,7 @@ const questions = [
   line-height: 1.5;
   font-family: inherit;
 }
+
 .chip:hover {
   color: #d4a853;
   border-color: #d4a853;

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -19,6 +19,6 @@ function handleNavigate(page: string) {
 </script>
 
 <template>
-  <AppHeader :page="currentPage" @navigate="handleNavigate" />
-  <router-view />
+  <AppHeader :page="currentPage" @navigate="handleNavigate"/>
+  <router-view/>
 </template>

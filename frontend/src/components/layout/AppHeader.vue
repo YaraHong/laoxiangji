@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 defineProps<{ page: string }>()
 const emit = defineEmits<{ navigate: [page: 'chat' | 'knowledge'] }>()
 </script>
@@ -12,19 +12,19 @@ const emit = defineEmits<{ navigate: [page: 'chat' | 'knowledge'] }>()
       </div>
       <nav class="nav-tabs">
         <button
-          :class="['nav-btn', { active: page === 'chat' }]"
-          @click="emit('navigate', 'chat')"
+            :class="['nav-btn', { active: page === 'chat' }]"
+            @click="emit('navigate', 'chat')"
         >
           智能客服
         </button>
         <button
-          :class="['nav-btn', { active: page === 'knowledge' }]"
-          @click="emit('navigate', 'knowledge')"
+            :class="['nav-btn', { active: page === 'knowledge' }]"
+            @click="emit('navigate', 'knowledge')"
         >
           知识库管理
         </button>
       </nav>
-      <div class="user-area" />
+      <div class="user-area"/>
     </div>
   </header>
 </template>
@@ -39,31 +39,37 @@ const emit = defineEmits<{ navigate: [page: 'chat' | 'knowledge'] }>()
   padding: 0 24px;
   flex-shrink: 0;
 }
+
 .header-inner {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .logo {
   font-size: 28px;
 }
+
 .title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
 }
+
 .nav-tabs {
   display: flex;
   gap: 4px;
   flex: 1;
   justify-content: center;
 }
+
 .nav-btn {
   padding: 6px 16px;
   border: none;
@@ -74,14 +80,17 @@ const emit = defineEmits<{ navigate: [page: 'chat' | 'knowledge'] }>()
   cursor: pointer;
   transition: all 0.2s;
 }
+
 .nav-btn:hover {
   background: #f5f5f5;
   color: #333;
 }
+
 .nav-btn.active {
   background: #d4a853;
   color: #fff;
 }
+
 .user-area {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {onMounted} from 'vue'
 import {useChat} from '@/composables/useChat'
 import AppContent from '@/components/layout/AppContent.vue'
@@ -19,16 +19,16 @@ function handleTransfer() {
 <template>
   <div class="chat-view">
     <AppContent>
-      <ChatPanelLeft :session-id="chat.sessionId" @select-question="chat.send" />
+      <ChatPanelLeft :session-id="chat.sessionId" @select-question="chat.send"/>
       <ChatPanelRight
-        :messages="chat.messages"
-        :sending="chat.sending"
-        :loading="chat.loading"
-        :lead-hint="chat.leadHint"
-        :transferred="chat.transferred"
-        :session-id="chat.sessionId"
-        @send="chat.send"
-        @transfer="handleTransfer"
+          :lead-hint="chat.leadHint"
+          :loading="chat.loading"
+          :messages="chat.messages"
+          :sending="chat.sending"
+          :session-id="chat.sessionId"
+          :transferred="chat.transferred"
+          @send="chat.send"
+          @transfer="handleTransfer"
       />
     </AppContent>
   </div>

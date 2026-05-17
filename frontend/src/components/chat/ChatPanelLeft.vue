@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {ref} from 'vue'
 import CooperationProcess from './CooperationProcess.vue'
 import QuickQuestions from './QuickQuestions.vue'
@@ -14,17 +14,18 @@ const collapsed = ref(false)
   <button class="toggle-btn" @click="collapsed = !collapsed">
     {{ collapsed ? '☰ 菜单' : '✕' }}
   </button>
-  <aside class="left-panel" :class="{ collapsed }">
+  <aside :class="{ collapsed }" class="left-panel">
     <div class="brand-section">
       <div class="brand-logo">🐔</div>
       <h2 class="brand-name">老乡鸡</h2>
       <p class="brand-tagline">全国知名中式快餐品牌</p>
       <p class="brand-desc">全国 1200+ 门店 · 年服务 1 亿人次</p>
     </div>
-    <el-divider />
-    <CooperationProcess />
-    <el-divider />
-    <QuickQuestions @select-question="emit('select-question', $event)" />  </aside>
+    <el-divider/>
+    <CooperationProcess/>
+    <el-divider/>
+    <QuickQuestions @select-question="emit('select-question', $event)"/>
+  </aside>
 </template>
 
 <style scoped>
@@ -41,6 +42,7 @@ const collapsed = ref(false)
   font-size: 13px;
   cursor: pointer;
 }
+
 .left-panel {
   width: 320px;
   min-width: 280px;
@@ -54,33 +56,40 @@ const collapsed = ref(false)
   flex-shrink: 0;
   transition: transform 0.25s ease;
 }
+
 .left-panel.collapsed {
   display: none;
 }
+
 .brand-section {
   text-align: center;
   padding: 4px 0 8px;
 }
+
 .brand-logo {
   font-size: 36px;
   margin-bottom: 4px;
 }
+
 .brand-name {
   font-size: 18px;
   font-weight: 700;
   color: #d4a853;
   margin: 0 0 2px;
 }
+
 .brand-tagline {
   font-size: 12px;
   color: #666;
   margin: 0 0 2px;
 }
+
 .brand-desc {
   font-size: 11px;
   color: #999;
   margin: 0;
 }
+
 .left-panel :deep(.el-divider--horizontal) {
   margin: 8px 0;
 }
@@ -89,6 +98,7 @@ const collapsed = ref(false)
   .toggle-btn {
     display: block;
   }
+
   .left-panel {
     position: fixed;
     left: 0;
@@ -96,8 +106,9 @@ const collapsed = ref(false)
     bottom: 0;
     z-index: 20;
     width: 300px;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
   }
+
   .left-panel.collapsed {
     display: none;
   }

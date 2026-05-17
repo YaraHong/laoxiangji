@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {onMounted, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {UploadFilled} from '@element-plus/icons-vue'
@@ -18,7 +18,7 @@ const docTypes = ['加盟政策', 'FAQ', '招商话术', '培训支持', '门店
 const uploadRef = ref()
 
 // FAQ create form
-const faqForm = ref({ question: '', answer: '', category: '通用', priority: 0 })
+const faqForm = ref({question: '', answer: '', category: '通用', priority: 0})
 const faqCreating = ref(false)
 
 onMounted(() => {
@@ -29,7 +29,7 @@ onMounted(() => {
 async function loadDocuments() {
   loadingDocs.value = true
   try {
-    const { data } = await listDocuments()
+    const {data} = await listDocuments()
     documents.value = data
   } catch {
     ElMessage.error('加载文档列表失败')
@@ -41,7 +41,7 @@ async function loadDocuments() {
 async function loadFAQ() {
   loadingFAQ.value = true
   try {
-    const { data } = await listFAQ()
+    const {data} = await listFAQ()
     faqs.value = data
   } catch {
     ElMessage.error('加载 FAQ 失败')
@@ -93,7 +93,7 @@ async function onCreateFAQ() {
   try {
     await createFAQ(faqForm.value)
     ElMessage.success('FAQ 创建成功')
-    faqForm.value = { question: '', answer: '', category: '通用', priority: 0 }
+    faqForm.value = {question: '', answer: '', category: '通用', priority: 0}
     loadFAQ()
   } catch {
     ElMessage.error('创建失败')
@@ -128,14 +128,16 @@ function statusText(status: string) {
     <!-- Upload area -->
     <div class="upload-section">
       <el-upload
-        ref="uploadRef"
-        drag
-        :auto-upload="false"
-        :on-change="(f: any) => onUpload(f.raw!)"
-        :show-file-list="false"
-        accept=".pdf,.docx,.txt,.md"
+          ref="uploadRef"
+          :auto-upload="false"
+          :on-change="(f: any) => onUpload(f.raw!)"
+          :show-file-list="false"
+          accept=".pdf,.docx,.txt,.md"
+          drag
       >
-        <el-icon :size="36"><UploadFilled /></el-icon>
+        <el-icon :size="36">
+          <UploadFilled/>
+        </el-icon>
         <div class="upload-text">拖拽文件到此处或<em>点击上传</em></div>
         <div class="upload-hint">支持 PDF、Word、TXT、Markdown</div>
       </el-upload>
@@ -145,11 +147,11 @@ function statusText(status: string) {
           <el-radio-button v-for="t in docTypes" :key="t" :value="t">{{ t }}</el-radio-button>
         </el-radio-group>
         <el-button
-          v-if="uploading"
-          type="primary"
-          size="small"
-          loading
-          style="margin-left: 12px"
+            v-if="uploading"
+            loading
+            size="small"
+            style="margin-left: 12px"
+            type="primary"
         >
           上传中...
         </el-button>
@@ -159,10 +161,10 @@ function statusText(status: string) {
     <!-- Tabs -->
     <el-tabs v-model="activeTab" class="kb-tabs">
       <el-tab-pane label="知识文档" name="documents">
-        <el-table :data="documents" v-loading="loadingDocs" stripe empty-text="暂无文档">
-          <el-table-column prop="title" label="标题" min-width="180" show-overflow-tooltip />
-          <el-table-column prop="doc_type" label="类型" width="100" />
-          <el-table-column prop="version" label="版本" width="80" />
+        <el-table v-loading="loadingDocs" :data="documents" empty-text="暂无文档" stripe>
+          <el-table-column label="标题" min-width="180" prop="title" show-overflow-tooltip/>
+          <el-table-column label="类型" prop="doc_type" width="100"/>
+          <el-table-column label="版本" prop="version" width="80"/>
           <el-table-column label="状态" width="90">
             <template #default="{ row }">
               <el-tag :type="statusTag(row.status)" size="small">
@@ -170,13 +172,13 @@ function statusText(status: string) {
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="chunk_count" label="Chunk 数" width="90" align="center" />
-          <el-table-column label="启用" width="70" align="center">
+          <el-table-column align="center" label="Chunk 数" prop="chunk_count" width="90"/>
+          <el-table-column align="center" label="启用" width="70">
             <template #default="{ row }">
               <el-switch
-                :model-value="row.enabled"
-                size="small"
-                @change="onToggle(row)"
+                  :model-value="row.enabled"
+                  size="small"
+                  @change="onToggle(row)"
               />
             </template>
           </el-table-column>
@@ -185,10 +187,10 @@ function statusText(status: string) {
               {{ row.uploaded_at?.slice(0, 16).replace('T', ' ') }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="140" fixed="right">
+          <el-table-column fixed="right" label="操作" width="140">
             <template #default="{ row }">
-              <el-button text size="small" @click="onReEmbed(row)">向量化</el-button>
-              <el-button text size="small" type="danger" @click="onToggle(row)">
+              <el-button size="small" text @click="onReEmbed(row)">向量化</el-button>
+              <el-button size="small" text type="danger" @click="onToggle(row)">
                 {{ row.enabled ? '禁用' : '启用' }}
               </el-button>
             </template>
@@ -198,20 +200,20 @@ function statusText(status: string) {
 
       <el-tab-pane label="FAQ" name="faq">
         <div class="faq-create-bar">
-          <el-input v-model="faqForm.question" placeholder="问题" style="width: 200px" size="small" />
-          <el-input v-model="faqForm.answer" placeholder="答案" style="width: 300px" size="small" />
-          <el-input v-model="faqForm.category" placeholder="分类" style="width: 100px" size="small" />
-          <el-button type="primary" size="small" :loading="faqCreating" @click="onCreateFAQ">
+          <el-input v-model="faqForm.question" placeholder="问题" size="small" style="width: 200px"/>
+          <el-input v-model="faqForm.answer" placeholder="答案" size="small" style="width: 300px"/>
+          <el-input v-model="faqForm.category" placeholder="分类" size="small" style="width: 100px"/>
+          <el-button :loading="faqCreating" size="small" type="primary" @click="onCreateFAQ">
             添加 FAQ
           </el-button>
         </div>
-        <el-table :data="faqs" v-loading="loadingFAQ" stripe empty-text="暂无 FAQ">
-          <el-table-column prop="question" label="问题" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="category" label="分类" width="100" />
-          <el-table-column prop="priority" label="优先级" width="80" align="center" />
-          <el-table-column label="启用" width="70" align="center">
+        <el-table v-loading="loadingFAQ" :data="faqs" empty-text="暂无 FAQ" stripe>
+          <el-table-column label="问题" min-width="200" prop="question" show-overflow-tooltip/>
+          <el-table-column label="分类" prop="category" width="100"/>
+          <el-table-column align="center" label="优先级" prop="priority" width="80"/>
+          <el-table-column align="center" label="启用" width="70">
             <template #default="{ row }">
-              <el-switch :model-value="row.enabled" size="small" />
+              <el-switch :model-value="row.enabled" size="small"/>
             </template>
           </el-table-column>
           <el-table-column label="创建时间" width="170">
@@ -232,36 +234,43 @@ function statusText(status: string) {
   flex-direction: column;
   overflow: hidden;
 }
+
 .upload-section {
   padding: 16px 20px;
   background: #fff;
   border-bottom: 1px solid #eee;
   flex-shrink: 0;
 }
+
 .upload-text {
   font-size: 14px;
   color: #666;
   margin-top: 8px;
 }
+
 .upload-text em {
   color: #d4a853;
   font-style: normal;
 }
+
 .upload-hint {
   font-size: 12px;
   color: #999;
   margin-top: 4px;
 }
+
 .upload-type {
   display: flex;
   align-items: center;
   margin-top: 12px;
 }
+
 .type-label {
   font-size: 13px;
   color: #666;
   margin-right: 8px;
 }
+
 .kb-tabs {
   flex: 1;
   overflow: hidden;
@@ -269,13 +278,16 @@ function statusText(status: string) {
   flex-direction: column;
   padding: 0 20px;
 }
+
 :deep(.el-tabs__content) {
   flex: 1;
   overflow-y: auto;
 }
+
 :deep(.el-tabs__header) {
   margin-bottom: 8px;
 }
+
 .faq-create-bar {
   display: flex;
   gap: 8px;

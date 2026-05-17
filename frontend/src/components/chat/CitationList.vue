@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import type {Citation} from '@/types/chat'
 
 defineProps<{ citations: Citation[] }>()
@@ -20,17 +20,21 @@ defineProps<{ citations: Citation[] }>()
   margin-top: 8px;
   font-size: 12px;
 }
+
 .citation-item {
   padding: 6px 0;
   border-bottom: 1px solid #f0f0f0;
 }
+
 .citation-item:last-child {
   border-bottom: none;
 }
+
 .citation-title {
   color: #666;
   font-weight: 500;
 }
+
 .citation-snippet {
   color: #999;
   margin-top: 2px;

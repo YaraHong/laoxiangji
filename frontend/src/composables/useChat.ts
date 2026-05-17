@@ -1,6 +1,6 @@
 import {nextTick, reactive, ref} from 'vue'
 import {createSession, getSession, sendMessageStream} from '@/api/chat'
-import type {Citation, LeadHint, Message} from '@/types/chat'
+import type {LeadHint, Message} from '@/types/chat'
 
 const SESSION_KEY = 'lxg_session_id'
 
@@ -97,20 +97,8 @@ export function useChat() {
                         nextTick(() => scrollToBottom())
                     }
                 },
-                onCitations(cits: Citation[]) {
+                onDone() {
                     if (msgIndex >= 0) {
-                        messages.value[msgIndex].citations = cits
-                    }
-                },
-                onLeadHint(hint: LeadHint) {
-                    leadHint.value = hint
-                },
-                onTransfer() {
-                    transferred.value = true
-                },
-                onDone(messageId: number) {
-                    if (msgIndex >= 0) {
-                        messages.value[msgIndex].id = messageId
                         messages.value[msgIndex].isStreaming = false
                     }
                     sending.value = false

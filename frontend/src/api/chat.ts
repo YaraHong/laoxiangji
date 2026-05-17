@@ -1,5 +1,5 @@
 import api from './index'
-import type {Citation, CreateSessionResult, LeadHint, SessionDetail} from '@/types/chat'
+import type {CreateSessionResult, SessionDetail} from '@/types/chat'
 
 export function createSession(channel = 'web', visitorId?: string) {
     return api.post<CreateSessionResult>('/api/chat/sessions', {
@@ -14,10 +14,7 @@ export function getSession(sessionId: number) {
 
 export interface StreamCallbacks {
     onContent: (text: string) => void
-    onCitations: (citations: Citation[]) => void
-    onLeadHint: (leadHint: LeadHint) => void
-    onTransfer: () => void
-    onDone: (messageId: number) => void
+    onDone: () => void
     onError: (message: string) => void
 }
 
@@ -56,33 +53,14 @@ export async function sendMessageStream(
             const lines = buffer.split('\n')
             buffer = lines.pop() || ''
 
-            let eventType = ''
             for (const line of lines) {
-                if (line.startsWith('event: ')) {
-                    eventType = line.slice(7).trim()
-                } else if (line.startsWith('data: ')) {
-                    const data = JSON.parse(line.slice(6))
-                    switch (eventType) {
-                        case 'content':
-                            callbacks.onContent(data.text)
-                            break
-                        case 'citations':
-                            callbacks.onCitations(data)
-                            break
-                        case 'lead_hint':
-                            callbacks.onLeadHint(data)
-                            break
-                        case 'transfer':
-                            callbacks.onTransfer()
-                            break
-                        case 'meta':
-                            callbacks.onDone(data.message_id)
-                            break
-                        case 'error':
-                            callbacks.onError(data.message)
-                            break
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6)
+                    if (data === '[DONE]') {
+                        callbacks.onDone()
+                        return
                     }
-                    eventType = ''
+                    callbacks.onContent(data)
                 }
             }
         }

@@ -43,3 +43,9 @@ export interface CreateSessionResult {
     session_id: number
     session_no: string
 }
+
+export interface StreamCallbacks {
+    onContent: (text: string) => void
+    onDone: () => void
+    onError: (message: string) => void
+}

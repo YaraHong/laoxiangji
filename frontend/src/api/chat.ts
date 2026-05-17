@@ -1,5 +1,5 @@
 import api from './index'
-import type {CreateSessionResult, SessionDetail} from '@/types/chat'
+import type {CreateSessionResult, SessionDetail, StreamCallbacks} from '@/types/chat'
 
 export function createSession(channel = 'web', visitorId?: string) {
     return api.post<CreateSessionResult>('/api/chat/sessions', {
@@ -10,12 +10,6 @@ export function createSession(channel = 'web', visitorId?: string) {
 
 export function getSession(sessionId: number) {
     return api.get<SessionDetail>(`/api/chat/sessions/${sessionId}`)
-}
-
-export interface StreamCallbacks {
-    onContent: (text: string) => void
-    onDone: () => void
-    onError: (message: string) => void
 }
 
 export async function sendMessageStream(

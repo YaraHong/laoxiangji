@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type {LeadHint, Message} from '@/types/chat'
+import {QUICK_QUESTIONS} from '@/utils/constants'
 import ChatBubble from './ChatBubble.vue'
 import ChatInput from './ChatInput.vue'
 
@@ -16,14 +17,6 @@ const emit = defineEmits<{
   send: [text: string]
   transfer: []
 }>()
-
-const quickQuestions = [
-  '加盟费用大概多少？',
-  '加盟需要什么条件？',
-  '回本周期多长？',
-  '总部提供哪些支持？',
-  '怎么走加盟流程？',
-]
 </script>
 
 <template>
@@ -48,7 +41,7 @@ const quickQuestions = [
           <p class="welcome-desc">我是您的智能招商顾问，可以为您解答加盟费用、流程、区域、支持政策等问题。</p>
           <div class="welcome-questions">
             <el-button
-                v-for="q in quickQuestions"
+                v-for="q in QUICK_QUESTIONS"
                 :key="q"
                 class="welcome-chip"
                 round

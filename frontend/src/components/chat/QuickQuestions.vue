@@ -1,13 +1,7 @@
 <script lang="ts" setup>
-const emit = defineEmits<{ 'select-question': [text: string] }>()
+import {QUICK_QUESTIONS} from '@/utils/constants'
 
-const questions = [
-  '加盟费用大概多少？',
-  '加盟需要什么条件？',
-  '回本周期多长？',
-  '总部提供哪些支持？',
-  '怎么走加盟流程？',
-]
+const emit = defineEmits<{ 'select-question': [text: string] }>()
 </script>
 
 <template>
@@ -15,7 +9,7 @@ const questions = [
     <h3 class="section-title">快捷问题</h3>
     <div class="question-chips">
       <button
-          v-for="q in questions"
+          v-for="q in QUICK_QUESTIONS"
           :key="q"
           class="chip"
           @click="emit('select-question', q)"

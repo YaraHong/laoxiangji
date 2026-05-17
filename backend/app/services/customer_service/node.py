@@ -77,9 +77,6 @@ def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
         query = result_json.get("query_rewrite", state["user_message"])
         doctype = result_json.get("doctype", [])
 
-        logger.info(f"query: {query}")
-        logger.info(f"doctype: {doctype}")
-
         embedding_response = openai_client.embeddings.create(
             model='Qwen/Qwen3-Embedding-8B',
             input=query,
@@ -108,7 +105,15 @@ def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
             output_fields=["content", "doc_type"]
         )
 
-        state["retrieved_documents"] = results
+        retrieved_contents = []
+        if results and len(results) > 0:
+            for hit in results[0]:
+                content_text = hit.entity.get("content")
+                if content_text:
+                    retrieved_contents.append(content_text)
+
+        # 写回 state
+        state["retrieved_documents"] = retrieved_contents
 
         logger.info("【向量检索完成 - Milvus】")
 
@@ -150,7 +155,7 @@ async def llm_output_node(state: OverallStatePrivate) -> AsyncGenerator[Dict[str
     LLM流式输出节点：生成并输出回复内容
     """
     logger.info("【LLM输出开始】")
-
+    logger.info(state["prompt"])
     messages = [
         SystemMessage(content=state["prompt"]),
         HumanMessage(content=state["user_message"])

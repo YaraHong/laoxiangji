@@ -1,6 +1,6 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Annotated
 
-from langchain_core.messages import BaseMessage
+from langgraph.graph import add_messages
 
 
 class OverallStatePrivate(TypedDict):
@@ -8,7 +8,7 @@ class OverallStatePrivate(TypedDict):
     user_message: str
 
     # 历史消息
-    messages: List[BaseMessage]
+    messages: Annotated[list, add_messages]
 
     # 当前意图
     intent: Optional[str]

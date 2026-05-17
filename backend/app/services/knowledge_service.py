@@ -16,10 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.logger_handle import logger
 from app.core.milvus import get_collection
 from app.core.minio_client import download_file, upload_file
+from app.core.model_factory import openai_client
 from app.models.faq import FAQ
 from app.models.knowledge_chunk import KnowledgeChunk
 from app.models.knowledge_document import KnowledgeDocument
-from app.core.model_factory import create_embedding
 from app.services.text_cleaner import clean_document_text
 
 DOC_TYPE_MAP = {
@@ -76,7 +76,11 @@ async def _process_document(
             batch_size = 20
             for i in range(0, len(texts), batch_size):
                 batch = texts[i:i + batch_size]
-                batch_vectors = await create_embedding(batch)
+                batch_vectors = openai_client.embeddings.create(
+                    model='Qwen/Qwen3-Embedding-8B',
+                    input=batch,
+                    encoding_format="float"
+                )
                 vectors.extend(batch_vectors)
                 logger.debug(
                     "Embedding 批次 %d/%d 完成", i // batch_size + 1, (len(texts) + batch_size - 1) // batch_size

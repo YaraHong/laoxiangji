@@ -2,8 +2,8 @@ from typing import Any
 
 from app.core.logger_handle import logger
 from app.core.milvus import get_collection
+from app.core.model_factory import openai_client
 from app.services.ai_service import build_messages
-from app.core.model_factory import embed_query
 
 
 def _build_references(chunks: list[dict]) -> str:
@@ -24,7 +24,12 @@ async def retrieve_from_milvus(
         doc_type: str | None = None,
 ) -> list[dict]:
     try:
-        vector = await embed_query(query)
+        vector = openai_client.embeddings.create(
+            model='Qwen/Qwen3-Embedding-8B',
+            input=query,
+            encoding_format="float",
+            dimensions=1024
+        )
         logger.debug("Embedding 成功, dims=%d, query=%.50s...", len(vector), query)
     except Exception:
         logger.warning("Embedding 调用失败, query=%.50s...", query, exc_info=True)

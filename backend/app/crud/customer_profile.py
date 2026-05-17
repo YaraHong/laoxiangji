@@ -137,6 +137,9 @@ async def upsert_profile(db: AsyncSession, lead_id: int, **kwargs) -> CustomerPr
     return profile
 
 
+from sqlalchemy import delete
+
+
 async def replace_tags(
         db: AsyncSession,
         lead_id: int,
@@ -144,15 +147,11 @@ async def replace_tags(
 ) -> None:
     """替换客户标签"""
     await db.execute(
-        select(CustomerTag).where(CustomerTag.lead_id == lead_id)
+        delete(CustomerTag).where(CustomerTag.lead_id == lead_id)
     )
-    result = await db.execute(
-        select(CustomerTag).where(CustomerTag.lead_id == lead_id)
-    )
-    existing = result.scalars().all()
-    for tag in existing:
-        await db.delete(tag)
+    await db.flush()
 
+    # 插入
     for tag_data in tags:
         tag = CustomerTag(
             lead_id=lead_id,

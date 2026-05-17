@@ -3,6 +3,7 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.logger_handle import logger
 from app.services import (
     save_user_message,
     get_cached_messages
@@ -19,7 +20,6 @@ from app.services.customer_service.node import (
     conversation_analysis
 )
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-from app.utils.logger_handle import logger
 
 
 async def run_customer_pipeline(

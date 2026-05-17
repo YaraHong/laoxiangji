@@ -5,19 +5,15 @@ from langchain_core.messages import (
     HumanMessage,
     SystemMessage
 )
-
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 
 from app.services.customer_service.overall_state_private import OverallStatePrivate
-
 from app.services.model_factory import (
     chat_llm,
     streaming_chat_llm
 )
-
 from app.services.prompt_loader import load_prompt
-
 from app.utils.logger_handle import logger
 
 json_output_parser = JsonOutputParser()
@@ -26,7 +22,6 @@ json_output_parser = JsonOutputParser()
 def intent_recognition(
         state: OverallStatePrivate
 ):
-
     start_time = time.time()
 
     logger.info("【意图识别开始】")
@@ -100,7 +95,6 @@ def intent_recognition(
 def should_escalate_to_human(
         state: OverallStatePrivate
 ):
-
     return state.get(
         "escalate_to_human",
         False
@@ -110,7 +104,6 @@ def should_escalate_to_human(
 def human_handling_node(
         state: OverallStatePrivate
 ):
-
     logger.info("【转人工】")
 
     return state
@@ -119,7 +112,6 @@ def human_handling_node(
 def should_use_vector_search(
         state: OverallStatePrivate
 ):
-
     return state.get(
         "retrieval_required",
         False
@@ -129,7 +121,6 @@ def should_use_vector_search(
 def vector_retrieval(
         state: OverallStatePrivate
 ):
-
     logger.info("【向量检索开始】")
 
     state["retrieved_documents"] = [
@@ -144,7 +135,6 @@ def vector_retrieval(
 def build_output_prompt(
         state: OverallStatePrivate
 ):
-
     logger.info("【Prompt构建开始】")
 
     retrieval_required = state.get(
@@ -197,7 +187,6 @@ def build_output_prompt(
 async def llm_output_node(
         state: OverallStatePrivate
 ):
-
     logger.info("【LLM输出开始】")
 
     full_response = ""
@@ -216,7 +205,6 @@ async def llm_output_node(
     ):
 
         if chunk.content:
-
             full_response += chunk.content
 
             # 增量流式输出
@@ -235,7 +223,6 @@ async def llm_output_node(
 async def save_message(
         state: OverallStatePrivate
 ):
-
     logger.info("【保存消息开始】")
 
     await asyncio.sleep(1)
@@ -248,7 +235,6 @@ async def save_message(
 async def conversation_analysis(
         state: OverallStatePrivate
 ):
-
     logger.info("【对话分析开始】")
 
     await asyncio.sleep(1)

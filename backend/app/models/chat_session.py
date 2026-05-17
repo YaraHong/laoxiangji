@@ -22,7 +22,10 @@ class ChatSession(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    messages: Mapped[list[ChatMessage]] = relationship(back_populates="session")
+    messages: Mapped[list[ChatMessage]] = relationship(
+        back_populates="session",
+        primaryjoin="ChatSession.id == foreign(ChatMessage.session_id)",
+    )
 
     __table_args__ = (
         Index("idx_chat_session_status", "status"),

@@ -82,7 +82,7 @@ async def _process_document(
                     input=batch,
                     encoding_format="float"
                 )
-                vectors.extend(batch_vectors)
+                vectors.extend([e.embedding for e in batch_vectors.data])
                 logger.debug(
                     "Embedding 批次 %d/%d 完成", i // batch_size + 1, (len(texts) + batch_size - 1) // batch_size
                 )

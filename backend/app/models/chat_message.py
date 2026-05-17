@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Index, Numeric, String, Text, func, text
+from sqlalchemy import BigInteger, DateTime, Index, Numeric, String, Text, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -13,7 +13,7 @@ class ChatMessage(Base):
     __tablename__ = "chat_message"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("chat_session.id"), nullable=False)
+    session_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     role: Mapped[str] = mapped_column(String(24), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     message_type: Mapped[str] = mapped_column(String(24), default="text", nullable=False)
@@ -27,7 +27,10 @@ class ChatMessage(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    session: Mapped[ChatSession] = relationship(back_populates="messages")
+    session: Mapped[ChatSession] = relationship(
+        back_populates="messages",
+        primaryjoin="foreign(ChatMessage.session_id) == ChatSession.id",
+    )
 
     __table_args__ = (
         Index("idx_chat_message_role", "role"),

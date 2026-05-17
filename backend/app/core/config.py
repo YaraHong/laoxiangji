@@ -41,7 +41,7 @@ class MilvusSettings(BaseModel):
     host: str = "localhost"
     port: int = 19530
     collection: str = "laoxiangji_knowledge"
-    dim: int = 1024
+    dim: int = 4096
 
 
 class MinioSettings(BaseModel):

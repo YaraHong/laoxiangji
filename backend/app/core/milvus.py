@@ -17,11 +17,17 @@ def _ensure_connection():
 def get_collection() -> Collection:
     _ensure_connection()
     name = settings.milvus.collection
+    dim = settings.milvus.dim
     if utility.has_collection(name):
-        logger.debug("加载已有 Milvus 集合: %s", name)
         col = Collection(name)
-        col.load()
-        return col
+        existing_dim = col.schema.fields[-1].params["dim"]
+        if existing_dim != dim:
+            logger.warning("集合维度不匹配，删除重建: 已有=%d, 期望=%d", existing_dim, dim)
+            utility.drop_collection(name)
+        else:
+            logger.debug("加载已有 Milvus 集合: %s", name)
+            col.load()
+            return col
 
     logger.info("创建新 Milvus 集合: %s, dim=%d", name, settings.milvus.dim)
     fields = [

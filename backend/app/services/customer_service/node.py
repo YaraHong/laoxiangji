@@ -117,28 +117,3 @@ async def llm_output_node(state: OverallStatePrivate) -> AsyncGenerator[Dict[str
             yield {"llm_output": chunk.content}
 
     yield {"llm_output_final": full_response}
-
-
-async def save_message(state: OverallStatePrivate) -> OverallStatePrivate:
-    """保存消息节点：持久化对话消息"""
-    logger.info("【保存消息开始】")
-
-    try:
-        pass
-    except Exception as e:
-        logger.error(f"保存消息失败: {e}")
-
-    return state
-
-
-async def conversation_analysis(state: OverallStatePrivate) -> OverallStatePrivate:
-    """
-    对话分析接单
-    """
-    logger.info("【对话分析开始】")
-
-    try:
-        pass
-    except Exception as e:
-        logger.error(f"对话分析失败: {e}")
-    return state

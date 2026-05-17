@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import BigInteger, Boolean, DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -16,9 +16,7 @@ class KnowledgeDocument(Base):
     file_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(24), default="uploaded", nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    created_by: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("system_user.id"), nullable=True
-    )
+    created_by: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

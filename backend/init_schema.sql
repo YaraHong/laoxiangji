@@ -1,12 +1,13 @@
 -- =========================================================
 -- Franchise CRM / RAG System Database Init Script
 -- PostgreSQL 15+
+-- (NO FOREIGN KEYS VERSION)
 -- =========================================================
 
 BEGIN;
 
 -- =========================================================
--- 1. "system_user"（最基础依赖）
+-- 1. system_user（最基础依赖）
 -- =========================================================
 CREATE TABLE "system_user"
 (
@@ -84,7 +85,7 @@ CREATE INDEX idx_chat_session_status ON chat_session (status);
 CREATE TABLE chat_message
 (
     id           BIGSERIAL PRIMARY KEY,
-    session_id   BIGINT      NOT NULL REFERENCES chat_session (id),
+    session_id   BIGINT      NOT NULL,
     role         VARCHAR(24) NOT NULL,
     content      TEXT        NOT NULL,
     message_type VARCHAR(24) NOT NULL DEFAULT 'text',
@@ -102,7 +103,7 @@ CREATE INDEX idx_chat_message_role ON chat_message (role);
 CREATE TABLE rag_citation
 (
     id             BIGSERIAL PRIMARY KEY,
-    message_id     BIGINT        NOT NULL REFERENCES chat_message (id),
+    message_id     BIGINT        NOT NULL,
     chunk_id       BIGINT        NOT NULL,
     document_title VARCHAR(200)  NOT NULL,
     score          NUMERIC(8, 6) NOT NULL,
@@ -118,7 +119,7 @@ CREATE INDEX idx_rag_citation_message ON rag_citation (message_id);
 CREATE TABLE customer_profile
 (
     id                        BIGSERIAL PRIMARY KEY,
-    lead_id                   BIGINT      NOT NULL UNIQUE REFERENCES customer_lead (id),
+    lead_id                   BIGINT      NOT NULL UNIQUE,
     budget_range              VARCHAR(80),
     has_store                 BOOLEAN,
     store_area                NUMERIC(10, 2),
@@ -138,7 +139,7 @@ CREATE TABLE customer_profile
 CREATE TABLE customer_tag
 (
     id         BIGSERIAL PRIMARY KEY,
-    lead_id    BIGINT      NOT NULL REFERENCES customer_lead (id),
+    lead_id    BIGINT      NOT NULL,
     tag_code   VARCHAR(64) NOT NULL,
     tag_name   VARCHAR(80) NOT NULL,
     source     VARCHAR(24) NOT NULL DEFAULT 'ai',
@@ -155,7 +156,7 @@ CREATE UNIQUE INDEX uk_customer_tag ON customer_tag (lead_id, tag_code);
 CREATE TABLE lead_score_record
 (
     id           BIGSERIAL PRIMARY KEY,
-    lead_id      BIGINT      NOT NULL REFERENCES customer_lead (id),
+    lead_id      BIGINT      NOT NULL,
     score        INTEGER     NOT NULL,
     intent_level VARCHAR(8)  NOT NULL,
     reasons      JSONB       NOT NULL DEFAULT '[]',
@@ -171,9 +172,9 @@ CREATE INDEX idx_lead_score_record_lead ON lead_score_record (lead_id, id);
 CREATE TABLE human_takeover
 (
     id             BIGSERIAL PRIMARY KEY,
-    session_id     BIGINT      NOT NULL REFERENCES chat_session (id),
-    lead_id        BIGINT REFERENCES customer_lead (id),
-    consultant_id  BIGINT REFERENCES consultant (id),
+    session_id     BIGINT      NOT NULL,
+    lead_id        BIGINT,
+    consultant_id  BIGINT,
     status         VARCHAR(24) NOT NULL DEFAULT 'pending',
     trigger_reason VARCHAR(80) NOT NULL,
     note           TEXT,
@@ -196,7 +197,7 @@ CREATE TABLE knowledge_document
     file_url   TEXT,
     status     VARCHAR(24)  NOT NULL DEFAULT 'uploaded',
     enabled    BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_by BIGINT REFERENCES "system_user" (id),
+    created_by BIGINT,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -209,7 +210,7 @@ CREATE INDEX idx_knowledge_document_status ON knowledge_document (status);
 CREATE TABLE knowledge_chunk
 (
     id          BIGSERIAL PRIMARY KEY,
-    document_id BIGINT      NOT NULL REFERENCES knowledge_document (id),
+    document_id BIGINT      NOT NULL,
     chunk_index INTEGER     NOT NULL,
     content     TEXT        NOT NULL,
     token_count INTEGER     NOT NULL DEFAULT 0,
@@ -232,7 +233,7 @@ CREATE TABLE faq_item
     category   VARCHAR(80)  NOT NULL,
     priority   INTEGER      NOT NULL DEFAULT 0,
     enabled    BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_by BIGINT REFERENCES "system_user" (id),
+    created_by BIGINT,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -245,8 +246,8 @@ CREATE INDEX idx_faq_item_category ON faq_item (category);
 CREATE TABLE feedback_record
 (
     id         BIGSERIAL PRIMARY KEY,
-    session_id BIGINT      NOT NULL REFERENCES chat_session (id),
-    message_id BIGINT REFERENCES chat_message (id),
+    session_id BIGINT      NOT NULL,
+    message_id BIGINT,
     rating     VARCHAR(16) NOT NULL,
     comment    TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -10,9 +10,7 @@ class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunk"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    document_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("knowledge_document.id"), nullable=False
-    )
+    document_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     token_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

@@ -123,11 +123,9 @@ class CustomerServiceNode:
 
         formatted_prompt = template.format(material=material)
 
-        logger.info(f"提示词：\n{formatted_prompt}")
+        state["prompt"] = formatted_prompt
 
-        state["messages"].append(
-            HumanMessage(content=formatted_prompt)
-        )
+        logger.info(f"提示词：\n{formatted_prompt}")
 
         return state
 

@@ -8,6 +8,7 @@ from langchain_core.prompts import PromptTemplate
 from app.core.logger_handle import logger
 from app.core.milvus import get_collection
 from app.core.model_factory import streaming_chat_llm, intent_llm, openai_client
+from app.services.customer_profile_service import _format_profile_for_prompt
 from app.services.customer_service.overall_state_private import OverallStatePrivate
 from app.services.prompt_loader import load_prompt
 
@@ -126,7 +127,7 @@ def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
 
 def build_output_prompt(state: OverallStatePrivate) -> OverallStatePrivate:
     """
-    构建输出提示词
+    构建输出提示词（含资料上下文 + 客户特征）
     """
 
     # 构建资料上下文
@@ -141,9 +142,22 @@ def build_output_prompt(state: OverallStatePrivate) -> OverallStatePrivate:
     else:
         material = "暂无资料"
 
+    # 构建客户特征上下文
+    profile_hint = state.get("profile_hint")
+    customer_context = _format_profile_for_prompt(profile_hint)
+
     prompt_template = load_prompt("rag_system_prompt.txt")
     template = PromptTemplate.from_template(prompt_template)
     formatted_prompt = template.format(material=material)
+
+    # 将客户特征追加到系统提示词
+    if profile_hint:
+        formatted_prompt += (
+            f"\n\n## 当前客户信息\n"
+            f"以下是从对话中提取的客户特征，请据此调整回复策略：\n"
+            f"{customer_context}\n"
+            f"注意：优先使用参考资料回答问题，同时结合客户特征给出个性化建议。"
+        )
 
     state["prompt"] = formatted_prompt
 
@@ -155,7 +169,6 @@ async def llm_output_node(state: OverallStatePrivate) -> AsyncGenerator[Dict[str
     LLM流式输出节点：生成并输出回复内容
     """
     logger.info("【LLM输出开始】")
-    logger.info(state["prompt"])
     messages = [
         SystemMessage(content=state["prompt"]),
         HumanMessage(content=state["user_message"])

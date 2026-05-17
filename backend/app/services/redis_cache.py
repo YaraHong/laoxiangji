@@ -4,6 +4,7 @@ from app.core.redis import get_redis
 
 MESSAGES_KEY = "chat:session:{session_id}:messages"
 SUMMARY_KEY = "chat:session:{session_id}:summary"
+PROFILE_HINT_KEY = "chat:session:{session_id}:profile_hint"
 MAX_ROUNDS = 10
 MAX_MESSAGES = MAX_ROUNDS * 2
 TTL = 86400
@@ -67,3 +68,30 @@ async def get_summary(session_id: int) -> str | None:
 async def delete_session(session_id: int) -> None:
     r = await _r()
     await r.delete(_msg_key(session_id), _sum_key(session_id))
+
+
+def _profile_key(session_id: int) -> str:
+    return PROFILE_HINT_KEY.format(session_id=session_id)
+
+
+async def set_profile_hint(session_id: int, profile: dict) -> None:
+    """缓存客户特征提取结果"""
+    r = await _r()
+    key = _profile_key(session_id)
+    await r.set(key, json.dumps(profile, ensure_ascii=False), ex=TTL)
+
+
+async def get_profile_hint(session_id: int) -> dict | None:
+    """获取缓存的客户特征"""
+    r = await _r()
+    key = _profile_key(session_id)
+    raw = await r.get(key)
+    if raw:
+        return json.loads(raw)
+    return None
+
+
+async def delete_profile_hint(session_id: int) -> None:
+    """删除客户特征缓存"""
+    r = await _r()
+    await r.delete(_profile_key(session_id))

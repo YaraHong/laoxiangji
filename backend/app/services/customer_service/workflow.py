@@ -1,3 +1,5 @@
+import asyncio
+
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
@@ -7,6 +9,10 @@ from app.core.logger_handle import logger
 from app.services import (
     save_user_message,
     get_cached_messages, save_assistant_message
+)
+from app.services.customer_profile_service import (
+    load_profile_for_session,
+    trait_extraction,
 )
 from app.services.customer_service.node import (
     intent_recognition,
@@ -26,10 +32,14 @@ async def run_customer_pipeline(
         content
 ):
     # 保存用户消息
-    await save_user_message(db, session_id, content)
+    user_message = content
+    await save_user_message(db, session_id, user_message)
 
     # 获取最近10轮对话
     history_msg = await get_cached_messages(db, session_id)
+
+    # 加载客户特征到 state，build_output_prompt 中将客户特征给到提示词
+    profile_hint = await load_profile_for_session(session_id)
 
     messages = []
 
@@ -84,7 +94,7 @@ async def run_customer_pipeline(
     logger.info(f"\n{graph.get_graph().draw_ascii()}")
 
     state = OverallStatePrivate(
-        user_message=content,
+        user_message=user_message,
         messages=messages,
         intent=None,
         retrieval_required=False,
@@ -93,9 +103,10 @@ async def run_customer_pipeline(
         prompt="",
         llm_output="",
         need_followup=False,
+        profile_hint=profile_hint,
     )
 
-    content = ""
+    assistant_reply = ""
     async for event in graph.astream_events(state, version="v2"):
         event_type = event["event"]
 
@@ -106,9 +117,26 @@ async def run_customer_pipeline(
             if isinstance(chunk, dict):
                 token = chunk.get("llm_output")
                 if token:
-                    content += token
+                    assistant_reply += token
                     yield f"data: {token}\n\n"
 
     # 保存大模型消息
-    await save_assistant_message(db, session_id, content)
+    await save_assistant_message(db, session_id, assistant_reply)
+
+    # 构造完整对话消息（含本轮），用于特征抽取
+    full_messages = list(history_msg)
+    full_messages.append({"role": "user", "content": user_message})
+    full_messages.append({"role": "assistant", "content": assistant_reply})
+
+    # 后台执行特征抽取
+    extraction_task = asyncio.create_task(
+        trait_extraction(db, session_id, full_messages)
+    )
+
     yield "data: [DONE]\n\n"
+
+    try:
+        await extraction_task
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        logger.exception("后台特征抽取异常: session_id=%d", session_id)

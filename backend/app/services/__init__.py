@@ -6,4 +6,8 @@ from app.services.chat_service import (
     save_assistant_message,
     save_user_message,
 )
+from app.services.customer_profile_service import (
+    load_profile_for_session,
+    trait_extraction,
+)
 from app.services.rag_service import retrieve_from_milvus

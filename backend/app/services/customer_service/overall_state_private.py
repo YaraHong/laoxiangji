@@ -30,3 +30,6 @@ class OverallStatePrivate(TypedDict):
 
     # 是否需要追问
     need_followup: bool
+
+    # 客户特征摘要（从 Redis 加载）
+    profile_hint: Optional[dict]

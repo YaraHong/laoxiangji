@@ -1,0 +1,1 @@
+from app.services.customer_service.workflow import run_customer_pipeline

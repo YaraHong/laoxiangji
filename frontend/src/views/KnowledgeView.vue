@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
-import {ElMessage} from 'element-plus'
 import type {UploadFile, UploadInstance} from 'element-plus'
+import {ElMessage} from 'element-plus'
 import {UploadFilled} from '@element-plus/icons-vue'
 import {createFAQ, listDocuments, listFAQ, reEmbedDocument, toggleDocument, uploadDocument,} from '@/api/knowledge'
 import type {FAQItem, KnowledgeDocument} from '@/types/knowledge'

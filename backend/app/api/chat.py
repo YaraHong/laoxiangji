@@ -74,17 +74,9 @@ async def get_chat_session(
 
 
 @router.post("/sessions/{session_id}/messages/stream")
-async def stream_chat_message(
-        session_id: int,
-        request: CreateMessageRequest,
-        db: AsyncSession = Depends(get_db),
-):
+async def stream_chat_message(session_id: int, request: CreateMessageRequest, db: AsyncSession = Depends(get_db)):
     return StreamingResponse(
-        run_customer_pipeline(
-            db,
-            session_id,
-            request.content
-        ),
+        run_customer_pipeline(db, session_id, request.content),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

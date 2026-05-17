@@ -1,0 +1,48 @@
+你是一个客户特征分析助手。根据以下对话历史，提取客户的关键信息。
+
+## 对话历史
+{conversation}
+
+## 待提取字段
+请从对话中提取以下客户信息，如果对话中没有提及则使用 null：
+
+- name: 客户姓名
+- phone: 电话号码
+- wechat: 微信号
+- city: 所在城市
+- budget_range: 预算范围（如：10-20万、20-50万、50万以上、未知）
+- has_store: 是否已有店面（true/false/null）
+- store_area: 店面面积（平方米，数字）
+- catering_experience: 餐饮经验描述
+- open_timeline: 计划开店时间（如：1个月内、3个月内、半年内、一年内、未知）
+- concerns: 客户关注的方面（数组，如：["费用", "流程", "选址", "培训"]）
+- intent_level: 意向等级（S=已决定加盟, A=强烈意向, B=中等意向, C=低意向, D=初步了解）
+- intent_score: 意向评分（0-100整数，综合判断意向强度）
+- tags: 推荐标签列表（数组，每个元素为 {{"code": "标签编码", "name": "标签名称"}}，如：{{"code": "high_budget", "name": "高预算"}}）
+- need_followup: 是否需要追问收集更多信息（true/false）
+- followup_questions: 建议追问的问题列表（字符串数组）
+
+## 分析要求
+- 只提取对话中明确提及或强烈暗示的信息，不要编造
+- intent_score 综合以下维度：提问深度、是否主动询问费用/流程、是否留下联系方式、对话轮次
+- tags 用于客户分层，包括但不限于：高预算/低预算、有经验/无经验、急迫/观望、已有店面/无店面
+- 返回纯 JSON，不要有其他内容
+
+返回格式：
+{{
+  "name": null,
+  "phone": null,
+  "wechat": null,
+  "city": null,
+  "budget_range": null,
+  "has_store": null,
+  "store_area": null,
+  "catering_experience": null,
+  "open_timeline": null,
+  "concerns": [],
+  "intent_level": "D",
+  "intent_score": 0,
+  "tags": [],
+  "need_followup": false,
+  "followup_questions": []
+}}

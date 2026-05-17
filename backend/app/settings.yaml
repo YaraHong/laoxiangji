@@ -61,11 +61,3 @@ text_splitter:
   chunk_overlap: 100
   separators: [ "\n\n", "\n", ".", "!", "?", "。", "！", "？", " ", "" ]
 
-# Prompt 模板路径管理
-prompts:
-  base_path: "prompts/"
-  templates:
-    chat_system: "chat_prompt.txt"
-    rag_system: "rag_system_prompt.txt"
-    lead_hint: "lead_hint_prompt.txt"
-    intent_recognition: "intent_recognition_prompt.txt"

@@ -67,7 +67,6 @@ class PromptTemplates(BaseModel):
     chat_system: str = "chat_prompt.txt"
     rag_system: str = "rag_system_prompt.txt"
     lead_hint: str = "lead_hint_prompt.txt"
-    intent_recognition: str = "intent_recognition_prompt.txt"
 
 
 class PromptSettings(BaseModel):

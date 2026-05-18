@@ -73,27 +73,6 @@ def _format_profile_for_prompt(profile: dict | None) -> str:
     return "\n".join(parts) if parts else "暂无客户特征信息"
 
 
-def _build_profile_summary(extracted: dict) -> dict:
-    """将 LLM 提取结果转换为 Redis 缓存的 profile 摘要"""
-    return {
-        "name": extracted.get("name"),
-        "phone": extracted.get("phone"),
-        "wechat": extracted.get("wechat"),
-        "city": extracted.get("city"),
-        "budget_range": extracted.get("budget_range"),
-        "has_store": extracted.get("has_store"),
-        "store_area": extracted.get("store_area"),
-        "catering_experience": extracted.get("catering_experience"),
-        "open_timeline": extracted.get("open_timeline"),
-        "concerns": extracted.get("concerns", []),
-        "intent_level": extracted.get("intent_level", "D"),
-        "intent_score": extracted.get("intent_score", 0),
-        "tags": extracted.get("tags", []),
-        "need_followup": extracted.get("need_followup", False),
-        "followup_questions": extracted.get("followup_questions", []),
-    }
-
-
 async def trait_extraction(
         session_id: int,
         messages: list[dict],

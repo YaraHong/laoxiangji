@@ -129,14 +129,21 @@ async def run_customer_pipeline(
     full_messages.append({"role": "assistant", "content": assistant_reply})
 
     # 后台执行特征抽取
-    extraction_task = asyncio.create_task(
-        trait_extraction(db, session_id, full_messages)
+    asyncio.create_task(
+        safe_trait_extraction(session_id, full_messages)
     )
 
     yield "data: [DONE]\n\n"
 
+
+async def safe_trait_extraction(
+        session_id: int,
+        messages: list[dict],
+):
     try:
-        await extraction_task
-    except Exception as e:
-        logger.error(e, exc_info=True)
+        await asyncio.shield(
+            trait_extraction(session_id, messages)
+        )
+
+    except Exception:
         logger.exception("后台特征抽取异常: session_id=%d", session_id)

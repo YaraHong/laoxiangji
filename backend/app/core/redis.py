@@ -10,5 +10,12 @@ async def get_redis() -> aioredis.Redis:
     global _redis
     if _redis is None:
         logger.info("连接 Redis: %s", settings.redis.url)
-        _redis = aioredis.from_url(settings.redis.url, decode_responses=True)
+        _redis = aioredis.from_url(
+            settings.redis.url,
+            decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
+            health_check_interval=30,
+            retry_on_timeout=True,
+        )
     return _redis

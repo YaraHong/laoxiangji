@@ -1,9 +1,10 @@
 import time
 from typing import Dict, AsyncGenerator
 
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableLambda
 
 from app.core.logger_handle import logger
 from app.core.milvus import get_collection
@@ -13,6 +14,12 @@ from app.services.customer_service.overall_state_private import OverallStatePriv
 from app.services.prompt_loader import load_prompt
 
 json_output_parser = JsonOutputParser()
+
+
+async def _log_raw_llm_output(msg: AIMessage) -> AIMessage:
+    """打印 LLM 原始输出，便于排查 JSON 解析失败问题"""
+    logger.info("LLM 原始输出: %s", msg.content)
+    return msg
 
 
 def intent_recognition(state: OverallStatePrivate) -> OverallStatePrivate:
@@ -69,14 +76,19 @@ async def vector_retrieval(state: OverallStatePrivate) -> OverallStatePrivate:
 
         prompt = load_prompt("context_rewriting.txt")
         template = PromptTemplate.from_template(prompt)
-        chain = template | intent_llm | json_output_parser
+        chain = template | intent_llm | RunnableLambda(_log_raw_llm_output) | json_output_parser
 
         result_json = await chain.ainvoke(
             input={"user_input": state["user_message"]}
         )
 
-        query = result_json.get("query_rewrite", state["user_message"])
-        doctype = result_json.get("doctype", [])
+        if result_json is None:
+            logger.warning("LLM 返回的 JSON 解析失败（result_json 为 None），使用原始用户消息作为查询")
+            query = state["user_message"]
+            doctype = []
+        else:
+            query = result_json.get("query_rewrite", state["user_message"])
+            doctype = result_json.get("doctype", [])
 
         embedding_response = openai_client.embeddings.create(
             model='Qwen/Qwen3-Embedding-8B',

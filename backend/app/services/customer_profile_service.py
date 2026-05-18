@@ -1,8 +1,10 @@
 """客户特征抽取服务"""
+
+from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import AsyncSessionLocal
 from app.core.logger_handle import logger
 from app.core.model_factory import chat_llm
 from app.crud.customer_profile import (
@@ -12,6 +14,12 @@ from app.services.prompt_loader import load_prompt
 from app.services.redis_cache import get_profile_hint, set_profile_hint
 
 json_output_parser = JsonOutputParser()
+
+
+async def _log_raw_llm_output(msg: AIMessage) -> AIMessage:
+    """打印 LLM 原始输出，便于排查 JSON 解析失败问题"""
+    logger.info("LLM 原始输出: %s", msg.content)
+    return msg
 
 
 async def load_profile_for_session(session_id: int) -> dict | None:
@@ -87,55 +95,62 @@ def _build_profile_summary(extracted: dict) -> dict:
 
 
 async def trait_extraction(
-        db: AsyncSession,
         session_id: int,
         messages: list[dict],
 ) -> dict | None:
     """
     从对话中抽取客户特征
     """
+
     logger.info("开始抽取客户特征")
+
     if not messages:
         return None
 
-    try:
-        # 调用大模型抽取客户特征
-        prompt = load_prompt("trait_extraction.txt")
-        conversation = _build_conversation_text(messages)
-        template = PromptTemplate.from_template(prompt)
-        chain = template | chat_llm | json_output_parser
-        result_json = await chain.ainvoke(input={"conversation": conversation})
+    async with AsyncSessionLocal() as db:
+        try:
+            # 调用大模型抽取客户特征
+            prompt = load_prompt("trait_extraction.txt")
+            conversation = _build_conversation_text(messages)
+            template = PromptTemplate.from_template(prompt)
+            chain = template | chat_llm | json_output_parser
 
-        await set_profile_hint(session_id, result_json)
+            result_json = await chain.ainvoke(input={"conversation": conversation})
 
-        # 持久化到数据库：查找或创建线索
-        lead = await save_or_update_lead(db, session_id, result_json)
+            if result_json is None:
+                logger.warning("客户特征抽取失败（result_json 为 None），跳过本轮特征更新")
+                return None
 
-        # 更新客户画像
-        await upsert_profile(
-            db,
-            lead.id,
-            budget_range=result_json.get("budget_range"),
-            has_store=result_json.get("has_store"),
-            store_area=result_json.get("store_area"),
-            catering_experience=result_json.get("catering_experience"),
-            open_timeline=result_json.get("open_timeline"),
-            concerns=result_json.get("concerns"),
-            extracted_fields=result_json,
-        )
+            # 持久化到数据库：查找或创建线索
+            lead = await save_or_update_lead(db, session_id, result_json)
 
-        # 更新标签
-        tags = result_json.get("tags", [])
-        if tags:
-            await replace_tags(db, lead.id, tags)
+            # 更新客户画像
+            await upsert_profile(
+                db,
+                lead.id,
+                budget_range=result_json.get("budget_range"),
+                has_store=result_json.get("has_store"),
+                store_area=result_json.get("store_area"),
+                catering_experience=result_json.get("catering_experience"),
+                open_timeline=result_json.get("open_timeline"),
+                concerns=result_json.get("concerns"),
+                extracted_fields=result_json,
+            )
 
-        await db.commit()
-        logger.info("客户特征已持久化: session_id=%d, lead_id=%d", session_id, lead.id)
+            # 更新标签
+            tags = result_json.get("tags", [])
 
-        return None
+            if tags:
+                await replace_tags(db, lead.id, tags)
 
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        logger.exception("客户特征抽取失败: session_id=%d", session_id)
-        await db.rollback()
-        return None
+            await db.commit()
+
+            logger.info("客户特征已持久化: session_id=%d, lead_id=%d", session_id, lead.id)
+
+            await set_profile_hint(session_id, result_json)
+
+            return None
+        except Exception:
+            logger.exception("客户特征抽取失败: session_id=%d", session_id)
+            await db.rollback()
+            return None

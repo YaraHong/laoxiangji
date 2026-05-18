@@ -1,7 +1,8 @@
 import uuid
 from datetime import date, datetime, timezone
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logger_handle import logger
@@ -21,10 +22,6 @@ async def get_lead_by_session(db: AsyncSession, session_id: int) -> CustomerLead
         select(CustomerLead).where(CustomerLead.latest_session_id == session_id)
     )
     return result.scalar_one_or_none()
-
-
-from typing import Any
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def save_or_update_lead(db: AsyncSession, session_id: int, lead_data: dict[str, Any]):
@@ -135,9 +132,6 @@ async def upsert_profile(db: AsyncSession, lead_id: int, **kwargs) -> CustomerPr
     await db.flush()
     logger.info("客户画像已更新: lead_id=%d", lead_id)
     return profile
-
-
-from sqlalchemy import delete
 
 
 async def replace_tags(
